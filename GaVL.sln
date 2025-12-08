@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36310.24 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaVL.API", "GaVL.API\GaVL.API.csproj", "{BD2242CE-7FA7-441D-B166-908C753021BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaVL.Data", "GaVL.Data\GaVL.Data.csproj", "{AB75002E-2DC3-44DA-8A53-7F7F36EC7C81}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BD2242CE-7FA7-441D-B166-908C753021BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD2242CE-7FA7-441D-B166-908C753021BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD2242CE-7FA7-441D-B166-908C753021BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD2242CE-7FA7-441D-B166-908C753021BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB75002E-2DC3-44DA-8A53-7F7F36EC7C81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB75002E-2DC3-44DA-8A53-7F7F36EC7C81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB75002E-2DC3-44DA-8A53-7F7F36EC7C81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB75002E-2DC3-44DA-8A53-7F7F36EC7C81}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B989A2E8-81EF-40C5-9117-E7ADB1B6FA4C}
+	EndGlobalSection
+EndGlobal
