@@ -27,5 +27,17 @@ namespace GaVL.API.Controllers
                 return BadRequest(result);
             }
         }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        {
+            var result = await _authService.Login(request);
+            if (result.Success)
+                return Ok(result);
+            else
+            {
+                _logger.LogWarning("Login failed for user {Username}: {Message}", request.Username, result.Message);
+                return BadRequest(result);
+            }
+        }
     }
 }

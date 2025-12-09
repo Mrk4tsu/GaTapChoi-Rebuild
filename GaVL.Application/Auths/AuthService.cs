@@ -10,6 +10,7 @@ namespace GaVL.Application.Auths
     public interface IAuthService
     {
         Task<ApiResult<Guid>> Register(RegisterRequest request);
+        Task<ApiResult<Guid>> Login(LoginRequest request);
     }
     public class AuthService : IAuthService
     {
@@ -20,6 +21,23 @@ namespace GaVL.Application.Auths
             _dbContext = dbContext;
             _logger = logger;
         }
+
+        public async Task<ApiResult<Guid>> Login(LoginRequest request)
+        {
+            var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == request.Username);
+            if (user == null)
+            {
+                return new ApiErrorResult<Guid>("Invalid username or password.");
+            }
+
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+            if (!isPasswordValid)
+            {
+                return new ApiErrorResult<Guid>("Invalid username or password.");
+            }
+            return new ApiSuccessResult<Guid>(user.Id, "Login successful.");
+        }
+
         public async Task<ApiResult<Guid>> Register(RegisterRequest request)
         {
             var isExistUsername = await isExistUsernameInDatabase(request.Username);
