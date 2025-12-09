@@ -17,4 +17,8 @@
     <ProjectReference Include="..\GaVL.Utilities\GaVL.Utilities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Backup\" />
+  </ItemGroup>
+
 </Project>

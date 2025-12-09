@@ -4,6 +4,7 @@ using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251209072541_Add_Table_Role")]
+    partial class Add_Table_Role
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,11 +90,8 @@ namespace GaVL.Data.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("password_hash");
 
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(4)
-                        .HasColumnName("role_id");
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -114,13 +114,9 @@ namespace GaVL.Data.Migrations
 
             modelBuilder.Entity("GaVL.Data.Entities.User", b =>
                 {
-                    b.HasOne("GaVL.Data.Entities.Role", "Role")
+                    b.HasOne("GaVL.Data.Entities.Role", null)
                         .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
+                        .HasForeignKey("RoleId");
                 });
 
             modelBuilder.Entity("GaVL.Data.Entities.Role", b =>

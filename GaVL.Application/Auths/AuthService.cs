@@ -2,40 +2,69 @@
 using GaVL.Data.Entities;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Auths;
+using GaVL.DTO.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace GaVL.Application.Auths
 {
     public interface IAuthService
     {
         Task<ApiResult<Guid>> Register(RegisterRequest request);
-        Task<ApiResult<Guid>> Login(LoginRequest request);
+        Task<ApiResult<TokenResponse>> Login(LoginRequest request);
     }
     public class AuthService : IAuthService
     {
         private ILogger<AuthService> _logger;
         private AppDbContext _dbContext;
-        public AuthService(AppDbContext dbContext, ILogger<AuthService> logger)
+
+        private readonly JwtSettings _jwtSettings;
+        private readonly ITokenService _tokenService;
+        public AuthService(AppDbContext dbContext, ILogger<AuthService> logger, ITokenService tokenService, IOptions<JwtSettings> options)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _tokenService = tokenService;
+            _jwtSettings = options.Value;
         }
 
-        public async Task<ApiResult<Guid>> Login(LoginRequest request)
+        public async Task<ApiResult<TokenResponse>> Login(LoginRequest request)
         {
-            var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _dbContext.Users
+            .AsNoTracking()
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user == null)
             {
-                return new ApiErrorResult<Guid>("Invalid username or password.");
+                return new ApiErrorResult<TokenResponse>("Invalid username or password.");
             }
 
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
             if (!isPasswordValid)
             {
-                return new ApiErrorResult<Guid>("Invalid username or password.");
+                return new ApiErrorResult<TokenResponse>("Invalid username or password.");
             }
-            return new ApiSuccessResult<Guid>(user.Id, "Login successful.");
+            var accessToken = await _tokenService.GenerateAccessToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            //var userRefreshToken = new UserRefreshToken
+            //{
+            //    UserId = user.Id,
+            //    RefreshToken = refreshToken,
+            //    ExpiresAt = DateTime.UtcNow.AddDays(
+            //    double.Parse(_configuration["JwtSettings:RefreshTokenExpirationDays"])),
+            //    CreatedAt = DateTime.UtcNow,
+            //    CreatedByIp = ipAddress,
+            //    IsRevoked = false
+            //};
+            var loginResult = new TokenResponse()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
+            };
+            return new ApiSuccessResult<TokenResponse>(loginResult, "Login successful.");
         }
 
         public async Task<ApiResult<Guid>> Register(RegisterRequest request)
