@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GaVL.Application\GaVL.Application.csproj" />
     <ProjectReference Include="..\GaVL.Data\GaVL.Data.csproj" />
     <ProjectReference Include="..\GaVL.Utilities\GaVL.Utilities.csproj" />
   </ItemGroup>

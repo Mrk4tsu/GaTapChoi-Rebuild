@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GaVL.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace GaVL.Data
 {
@@ -11,5 +12,6 @@ namespace GaVL.Data
         {
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
+        public DbSet<User> Users { get; set; }
     }
 }

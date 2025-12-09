@@ -13,12 +13,12 @@ namespace GaVL.API.Extensions
         public static IServiceCollection ConfigureDbContext(this IServiceCollection services, IConfiguration config)
         {
             var connectionString = config.GetConnectionString(SystemConstant.DB_CONNECTION_STRING);
-            if(string.IsNullOrEmpty(connectionString)) 
+            if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException(nameof(connectionString), "Database connection string is missing.");
             services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlServer(config.GetConnectionString(connectionString),
+                    options.UseSqlServer(connectionString,
                     sqlOptions => sqlOptions.EnableRetryOnFailure()));
-            //services.AddSingleton<IDbConnection>(sp => new SqlConnection(connectionString));
+            services.AddSingleton<IDbConnection>(sp => new SqlConnection(connectionString));
             return services;
         }
         public static IServiceCollection ConfigureRedis(this IServiceCollection services, IConfiguration config)

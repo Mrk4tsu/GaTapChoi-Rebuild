@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureDbContext(builder.Configuration)
                 .ConfigureRedis(builder.Configuration)
+                .AddDIService()
                 .AddSwaggerExplorer();
 
 builder.Services.AddControllers();
