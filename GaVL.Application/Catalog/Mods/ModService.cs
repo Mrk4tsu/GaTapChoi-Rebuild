@@ -13,6 +13,8 @@ namespace GaVL.Application.Catalog.Mods
     public interface IModService
     {
         Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request);
+        Task<ApiResult<ModDetailDTO>> GetModById(int modId);
+        Task<ApiResult<SeoModDTO>> GetSeoModById(int modId);
         Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId);
     }
     public class ModService : IModService
@@ -20,7 +22,7 @@ namespace GaVL.Application.Catalog.Mods
         private readonly AppDbContext _dbContext;
         private readonly IRedisService _redisService;
         private DateTime _now;
-        private const int CacheExpiryMinutes = 10;
+        private const int CacheExpiryValue = 10;
         public ModService(AppDbContext context, IRedisService redisService)
         {
             _dbContext = context;
@@ -82,7 +84,7 @@ namespace GaVL.Application.Catalog.Mods
                 PageSize = request.PageSize,
                 TotalRecords = totalRecords
             };
-            await _redisService.SetValue(cacheKey, result, TimeSpan.FromMinutes(CacheExpiryMinutes));
+            await _redisService.SetValue(cacheKey, result, TimeSpan.FromMinutes(CacheExpiryValue));
             return new ApiSuccessResult<PagedResult<ModDTO>>(result);
         }
 
@@ -91,6 +93,55 @@ namespace GaVL.Application.Catalog.Mods
             var createMod = new CreateModFacede(_dbContext, _redisService, _now);
             var result = await createMod.CreateMod(request, userId);
             return result;
+        }
+
+        public async Task<ApiResult<ModDetailDTO>> GetModById(int modId)
+        {
+            var mod = await _dbContext.Mods.AsNoTracking()
+                .Include(m => m.User)
+                .FirstOrDefaultAsync(m => m.Id == modId && !m.IsDeleted);
+            if (mod == null)
+            {
+                return new ApiErrorResult<ModDetailDTO>("Mod not found");
+            }
+            var modDetailDto = new ModDetailDTO
+            {
+                Id = mod.Id,
+                Name = mod.Name,
+                Description = mod.Description,
+                CreatedAt = mod.CreatedAt,
+                UpdatedAt = mod.UpdatedAt,
+                Username = mod.User.Username,
+                CrackType = mod.CrackType,
+                SeoAlias = mod.SeoAlias,
+                IsPrivate = mod.IsPrivate,
+                ViewCount = mod.ViewCount
+            };
+            return new ApiSuccessResult<ModDetailDTO>(modDetailDto);
+        }
+
+        public async Task<ApiResult<SeoModDTO>> GetSeoModById(int modId)
+        {
+            var cacheKey = $"seoMod:{modId}";
+            var cachedSeoMod = await _redisService.GetValue<SeoModDTO>(cacheKey);
+            if (cachedSeoMod != null)
+            {
+                return new ApiSuccessResult<SeoModDTO>(cachedSeoMod);
+            }
+            var mod = await _dbContext.Mods.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == modId && !m.IsDeleted);
+            if (mod == null) 
+            {
+                return new ApiErrorResult<SeoModDTO>("Mod not found");
+            }
+            var seoModDto = new SeoModDTO
+            {
+                Id = mod.Id,
+                Name = mod.Name,
+                SeoAlias = mod.SeoAlias
+            };
+            await _redisService.SetValue(cacheKey, seoModDto, TimeSpan.FromDays(CacheExpiryValue));
+            return new ApiSuccessResult<SeoModDTO>(seoModDto);
         }
     }
 }

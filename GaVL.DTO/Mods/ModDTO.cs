@@ -18,4 +18,10 @@
         public int ViewCount { get; set; }
         public string CategorySeoAlias { get; set; }
     }
+    public class SeoModDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string SeoAlias { get; set; }
+    }
 }

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GaVL.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/mod")]
     [ApiController]
     public class ModsController : BasesController
     {
@@ -19,6 +19,18 @@ namespace GaVL.API.Controllers
         public async Task<IActionResult> GetMods([FromQuery] ModQueryRequest request)
         {
             var result = await _modService.GetMods(request);
+            return Ok(result);
+        }
+        [HttpGet("get")]
+        public async Task<IActionResult> GetModById(int modId)
+        {
+            var result = await _modService.GetModById(modId);
+            return Ok(result);
+        }
+        [HttpGet("seo")]
+        public async Task<IActionResult> GetModBySeoAlias(int modId)
+        {
+            var result = await _modService.GetSeoModById(modId);
             return Ok(result);
         }
         [HttpPost, Authorize]
