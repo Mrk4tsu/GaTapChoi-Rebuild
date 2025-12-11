@@ -8,9 +8,9 @@ namespace GaVL.API.Controllers
     [Route("api/auth"), AllowAnonymous]
     [ApiController]
     public class AuthsController : ControllerBase
-    {      
+    {
         private readonly IAuthService _authService;
-        private readonly ILogger<AuthsController> _logger;       
+        private readonly ILogger<AuthsController> _logger;
         public AuthsController(IAuthService authService, ILogger<AuthsController> logger)
         {
             _authService = authService;
@@ -61,6 +61,18 @@ namespace GaVL.API.Controllers
             else
             {
                 _logger.LogWarning("Logout failed: {Message}", result.Message);
+                return BadRequest(result);
+            }
+        }
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var result = await _authService.ForgotPassword(request);
+            if (result.Success)
+                return Ok(result);
+            else
+            {
+                _logger.LogWarning("Forgot password failed for email {Email}: {Message}", request.Email, result.Message);
                 return BadRequest(result);
             }
         }
