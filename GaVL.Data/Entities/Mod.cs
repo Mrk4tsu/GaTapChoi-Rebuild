@@ -19,5 +19,6 @@ namespace GaVL.Data.Entities
         public string SeoAlias { get; set; }
         public Category Category { get; set; }
         public bool IsPrivate { get; set; }
+        public List<Url> Urls { get; set; } = new List<Url>();
     }
 }

@@ -8,11 +8,11 @@ namespace GaVL.API.Controllers
     [ApiController]
     public class BasesController : ControllerBase
     {
-        protected int? GetUserIdFromClaims()
+        protected Guid? GetUserIdFromClaims()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-            if (int.TryParse(userIdClaim.Value, out int userId))
+            if (Guid.TryParse(userIdClaim.Value, out Guid userId))
             {
                 return userId;
             }

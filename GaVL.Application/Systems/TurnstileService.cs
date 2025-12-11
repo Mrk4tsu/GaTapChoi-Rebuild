@@ -23,6 +23,11 @@ namespace GaVL.Application.Systems
         }
         public async Task<bool> ValidateTokenAsync(string token, string remoteIp = null)
         {
+            // Nếu chạy môi trường DEV thì bỏ qua
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase))
+                return true;
+
             if (string.IsNullOrEmpty(token)) return false;
             remoteIp ??= _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
             var request = new Dictionary<string, string>

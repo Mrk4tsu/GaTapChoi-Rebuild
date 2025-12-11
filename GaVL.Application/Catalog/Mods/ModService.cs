@@ -1,15 +1,18 @@
-﻿using GaVL.Application.Systems;
+﻿using Azure.Core;
+using GaVL.Application.Systems;
 using GaVL.Data;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Mods;
 using GaVL.DTO.Paging;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace GaVL.Application.Catalog.Mods
 {
     public interface IModService
     {
-        Task<ApiResult<PagedResult<ModDTO>>> GetModsAsync(ModQueryRequest request);
+        Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request);
+        Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId);
     }
     public class ModService : IModService
     {
@@ -22,7 +25,7 @@ namespace GaVL.Application.Catalog.Mods
             _redisService = redisService;
         }
 
-        public async Task<ApiResult<PagedResult<ModDTO>>> GetModsAsync(ModQueryRequest request)
+        public async Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request)
         {
             var cacheKey = $"mods:p{request.PageIndex}:s{request.PageSize}:u{request.Username?.ToLower() ?? "all"}:c{request.CategoryId ?? 0}";
             var cachedResult = await _redisService.GetValue<PagedResult<ModDTO>>(cacheKey);
@@ -48,7 +51,7 @@ namespace GaVL.Application.Catalog.Mods
 
             var totalRecords = await query.CountAsync();
             var mods = await query
-            .OrderByDescending(m => m.CreatedAt)
+            .OrderBy(m => m.CreatedAt)
             .Skip((request.PageIndex - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync();
@@ -75,6 +78,13 @@ namespace GaVL.Application.Catalog.Mods
             };
             await _redisService.SetValue(cacheKey, result, TimeSpan.FromMinutes(CacheExpiryMinutes));
             return new ApiSuccessResult<PagedResult<ModDTO>>(result);
+        }
+
+        public async Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId)
+        {
+            var createMod = new CreateModFacede(_dbContext, _redisService, DateTime.UtcNow);
+            var result = await createMod.CreateMod(request, userId);
+            return result;
         }
     }
 }

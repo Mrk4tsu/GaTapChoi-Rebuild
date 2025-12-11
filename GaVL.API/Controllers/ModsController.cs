@@ -8,7 +8,7 @@ namespace GaVL.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ModsController : ControllerBase
+    public class ModsController : BasesController
     {
         private readonly IModService _modService;
         public ModsController(IModService modService)
@@ -18,7 +18,15 @@ namespace GaVL.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMods([FromQuery] ModQueryRequest request)
         {
-            var result = await _modService.GetModsAsync(request);
+            var result = await _modService.GetMods(request);
+            return Ok(result);
+        }
+        [HttpPost, Authorize]
+        public async Task<IActionResult> CreateMod(ModCombineRequest request)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
+            var result = await _modService.CreateMod(request, userId.Value);
             return Ok(result);
         }
     }

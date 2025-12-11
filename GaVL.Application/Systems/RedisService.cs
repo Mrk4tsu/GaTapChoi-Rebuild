@@ -15,6 +15,8 @@ namespace GaVL.Application.Systems
 
         //Dùng để Rate Limit
         Task IncrementValue(string key);
+
+        Task DeleteKeysByPatternAsync(string pattern);
     }
     public class RedisService : IRedisService
     {
@@ -77,6 +79,21 @@ namespace GaVL.Application.Systems
         public async Task IncrementValue(string key)
         {
             await Database.StringIncrementAsync(key);
+        }
+
+        public async Task DeleteKeysByPatternAsync(string pattern)
+        {
+            var server = _connectionMultiplexer.GetServer(_connectionMultiplexer.GetEndPoints().First());
+            var keys = new List<RedisKey>();
+
+            await foreach (var key in server.KeysAsync(pattern: pattern))
+            {
+                keys.Add(key);
+            }
+            if (keys.Count > 0)
+            {
+                await Database.KeyDeleteAsync(keys.ToArray());
+            }
         }
     }
 }
