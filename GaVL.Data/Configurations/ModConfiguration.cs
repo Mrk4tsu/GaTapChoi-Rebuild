@@ -12,7 +12,7 @@ namespace GaVL.Data.Configurations
             builder.HasKey(m => m.Id);
             builder.Property(m => m.Id).HasColumnName("id").UseIdentityColumn();
             builder.Property(m => m.Name).IsRequired().HasMaxLength(150).HasColumnName("name");
-            builder.Property(m => m.Description).HasMaxLength(1000).HasColumnName("description");
+            builder.Property(m => m.Description).HasColumnName("description");
             builder.Property(m => m.IsPrivate).IsRequired().HasMaxLength(50).HasColumnName("is_private");
             builder.Property(m => m.IsDeleted).IsRequired().HasColumnName("is_deleted");
             builder.Property(m => m.IsLocked).IsRequired().HasColumnName("is_locked");
