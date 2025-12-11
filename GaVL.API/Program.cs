@@ -7,6 +7,7 @@ builder.Services.ConfigureDbContext(builder.Configuration)
                 .AddAuthorization()
                 .AddHttpContextAccessor()
                 .AddDIService()
+                .ConfigureJwt(builder.Configuration)
                 .AddSmtpConfig(builder.Configuration)
                 .AddService(builder.Configuration)
                 .AddSwaggerExplorer();
@@ -16,7 +17,8 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.ConfigureSwaggerExplorer()
-    .ConfigureCORS();
+   .ConfigureCORS()
+   .AddIdentityAuthMiddlewares();
 
 app.UseHttpsRedirection();
 

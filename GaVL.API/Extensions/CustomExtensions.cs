@@ -1,13 +1,17 @@
-﻿using GaVL.Application.Systems;
+﻿using GaVL.Application.Auths;
+using GaVL.Application.Systems;
 using GaVL.Data;
 using GaVL.DTO.Settings;
 using GaVL.Utilities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Data;
+using System.Text;
 
 namespace GaVL.API.Extensions
 {
@@ -108,6 +112,37 @@ namespace GaVL.API.Extensions
                        .AllowAnyHeader()
                        .AllowCredentials());
 
+            return app;
+        }
+        public static IServiceCollection ConfigureJwt(this IServiceCollection services, IConfiguration config)
+        {
+            services.Configure<JwtSettings>(config.GetSection(SystemConstant.JWT_SETTING));
+            services.AddScoped<TokenService>();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = config["JwtSettings:Issuer"],
+                    ValidAudience = config["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Secret"]!))
+                };
+            });
+
+            return services;
+        }
+        public static IApplicationBuilder AddIdentityAuthMiddlewares(this IApplicationBuilder app)
+        {
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
             return app;
         }
     }
