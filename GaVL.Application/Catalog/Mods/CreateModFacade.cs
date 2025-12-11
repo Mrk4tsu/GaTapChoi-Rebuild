@@ -7,7 +7,7 @@ using GaVL.Utilities;
 
 namespace GaVL.Application.Catalog.Mods
 {
-    public class CreateModFacede(AppDbContext _db, IRedisService _redis, DateTime _now)
+    public class CreateModFacade(AppDbContext _db, IRedisService _redis, DateTime _now)
     {
         public async Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId)
         {

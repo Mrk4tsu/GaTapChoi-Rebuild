@@ -16,6 +16,7 @@ namespace GaVL.Application.Catalog.Mods
         Task<ApiResult<ModDetailDTO>> GetModById(int modId);
         Task<ApiResult<SeoModDTO>> GetSeoModById(int modId);
         Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId);
+        Task<ApiResult<int>> UpdateMod(int modId, ModUpdateCombineRequest request,  Guid userId);
     }
     public class ModService : IModService
     {
@@ -90,7 +91,7 @@ namespace GaVL.Application.Catalog.Mods
 
         public async Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId)
         {
-            var createMod = new CreateModFacede(_dbContext, _redisService, _now);
+            var createMod = new CreateModFacade(_dbContext, _redisService, _now);
             var result = await createMod.CreateMod(request, userId);
             return result;
         }
@@ -142,6 +143,13 @@ namespace GaVL.Application.Catalog.Mods
             };
             await _redisService.SetValue(cacheKey, seoModDto, TimeSpan.FromDays(CacheExpiryValue));
             return new ApiSuccessResult<SeoModDTO>(seoModDto);
+        }
+
+        public async Task<ApiResult<int>> UpdateMod(int modId, ModUpdateCombineRequest request, Guid userId)
+        {
+            var updateMod = new UpdateModFacade(_dbContext, _redisService, _now);
+            var result = await updateMod.UpdateMod(modId, request, userId);
+            return result;
         }
     }
 }
