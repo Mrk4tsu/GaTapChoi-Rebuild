@@ -4,6 +4,7 @@ using GaVL.Data;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Mods;
 using GaVL.DTO.Paging;
+using GaVL.Utilities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,11 +19,16 @@ namespace GaVL.Application.Catalog.Mods
     {
         private readonly AppDbContext _dbContext;
         private readonly IRedisService _redisService;
+        private DateTime _now;
         private const int CacheExpiryMinutes = 10;
         public ModService(AppDbContext context, IRedisService redisService)
         {
             _dbContext = context;
             _redisService = redisService;
+            _now = new TimeHelperBuilder.Builder()
+               .SetTimestamp(DateTime.UtcNow)
+               .SetTimeZone("SE Asia Standard Time")
+               .SetRemoveTick(true).Build();
         }
 
         public async Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request)
@@ -82,7 +88,7 @@ namespace GaVL.Application.Catalog.Mods
 
         public async Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId)
         {
-            var createMod = new CreateModFacede(_dbContext, _redisService, DateTime.UtcNow);
+            var createMod = new CreateModFacede(_dbContext, _redisService, _now);
             var result = await createMod.CreateMod(request, userId);
             return result;
         }
