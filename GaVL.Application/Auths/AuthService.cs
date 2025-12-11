@@ -7,6 +7,7 @@ using GaVL.DTO.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace GaVL.Application.Auths
@@ -16,6 +17,7 @@ namespace GaVL.Application.Auths
         Task<ApiResult<Guid>> Register(RegisterRequest request);
         Task<ApiResult<TokenResponse>> Login(LoginRequest request);
         Task<ApiResult<TokenResponse>> Refresh(RefreshRequest request);
+        Task<ApiResult<bool>> Logout(LogoutRequest request);
     }
     public class AuthService : IAuthService
     {
@@ -115,6 +117,24 @@ namespace GaVL.Application.Auths
                 SessionId = request.SessionId
             };
             return new ApiSuccessResult<TokenResponse>(result, "Token refreshed successfully.");
+        }
+
+        public async Task<ApiResult<bool>> Logout(LogoutRequest request)
+        {
+            var principal = _tokenService.GetPrincipalFromExpiredToken(request.AccessToken);
+            var userId = Guid.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier));
+            var refreshKey = $"refresh:{userId}:{request.SessionId}";
+            await _redisService.RemoveKeyAsync(refreshKey);
+
+            var jwtHandler = new JwtSecurityTokenHandler();
+            var tokenExpiry = jwtHandler.ReadJwtToken(request.AccessToken).ValidTo;
+            var remainingTime = tokenExpiry - DateTime.UtcNow;
+            if (remainingTime > TimeSpan.Zero)
+            {
+                var blacklistKey = $"blacklist:{request.AccessToken}";
+                await _redisService.SetAsync(blacklistKey, "revoked", remainingTime);
+            }
+            return new ApiSuccessResult<bool>(true, "Logged out successfully.");
         }
     }
 }

@@ -52,5 +52,17 @@ namespace GaVL.API.Controllers
                 return BadRequest(result);
             }
         }
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+        {
+            var result = await _authService.Logout(request);
+            if (result.Success)
+                return Ok(result);
+            else
+            {
+                _logger.LogWarning("Logout failed: {Message}", result.Message);
+                return BadRequest(result);
+            }
+        }
     }
 }

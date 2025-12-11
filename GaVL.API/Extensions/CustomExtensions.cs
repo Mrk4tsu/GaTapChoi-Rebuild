@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Data;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 namespace GaVL.API.Extensions
@@ -135,6 +137,24 @@ namespace GaVL.API.Extensions
                     ValidIssuer = config["JwtSettings:Issuer"],
                     ValidAudience = config["JwtSettings:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:SecretKey"]!))
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var redis = context.HttpContext.RequestServices.GetRequiredService<IRedisService>();
+                        var token = context.SecurityToken as JsonWebToken;
+                        if (token == null)
+                        {
+                            context.Fail("Invalid token type.");
+                            return;
+                        }
+                        var blacklistKey = $"blacklist:{token.EncodedToken}";
+                        if (await redis.KeyExist(blacklistKey))
+                        {
+                            context.Fail("Token has been revoked.");
+                        }
+                    }
                 };
             });
 
