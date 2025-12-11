@@ -1,4 +1,5 @@
 ﻿using GaVL.Application.Auths;
+using GaVL.Application.Catalog.Mods;
 using GaVL.Application.Systems;
 using GaVL.DTO.Settings;
 using GaVL.Utilities;
@@ -21,6 +22,7 @@ namespace GaVL.API.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ITurnstileService, TurnstileService>();
+            services.AddScoped<IModService, ModService>();
             return services;
         }
     }
