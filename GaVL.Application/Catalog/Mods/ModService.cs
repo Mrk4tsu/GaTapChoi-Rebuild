@@ -4,9 +4,12 @@ using GaVL.Data;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Mods;
 using GaVL.DTO.Paging;
+using GaVL.DTO.Settings;
 using GaVL.Utilities;
+using Markdig;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace GaVL.Application.Catalog.Mods
 {
@@ -16,18 +19,26 @@ namespace GaVL.Application.Catalog.Mods
         Task<ApiResult<ModDetailDTO>> GetModById(int modId);
         Task<ApiResult<SeoModDTO>> GetSeoModById(int modId);
         Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId);
+        Task<ApiResult<int>> CreateCrack(ModCombineRequest request, string key, byte type);
         Task<ApiResult<int>> UpdateMod(int modId, ModUpdateCombineRequest request,  Guid userId);
+        Task<ApiResult<int>> UpdateStatus(int modId, Guid userId);
+        Task<ApiResult<bool>> IncreaseView(int modId);
+
     }
     public class ModService : IModService
     {
         private readonly AppDbContext _dbContext;
         private readonly IRedisService _redisService;
+        private readonly MarkdownPipeline _pipeline;
         private DateTime _now;
+        private readonly ModderSetting _modderSetting;
         private const int CacheExpiryValue = 10;
-        public ModService(AppDbContext context, IRedisService redisService)
+        public ModService(AppDbContext context, IOptions<ModderSetting> options, MarkdownPipeline pipeline, IRedisService redisService)
         {
             _dbContext = context;
+            _modderSetting = options.Value;
             _redisService = redisService;
+            _pipeline = pipeline;
             _now = new TimeHelperBuilder.Builder()
                .SetTimestamp(DateTime.UtcNow)
                .SetTimeZone("SE Asia Standard Time")
@@ -95,7 +106,17 @@ namespace GaVL.Application.Catalog.Mods
             var result = await createMod.CreateMod(request, userId);
             return result;
         }
-
+        public async Task<ApiResult<int>> CreateCrack(ModCombineRequest request, string key, byte type)
+        {
+            var createCrack = new CreateCrackFacade(
+                 _dbContext,
+                 _pipeline,
+                 Options.Create(_modderSetting),
+                 _redisService
+             );
+            var result = await createCrack.CreateCrack(request, key, type);
+            return result;
+        }
         public async Task<ApiResult<ModDetailDTO>> GetModById(int modId)
         {
             var mod = await _dbContext.Mods.AsNoTracking()
@@ -150,6 +171,31 @@ namespace GaVL.Application.Catalog.Mods
             var updateMod = new UpdateModFacade(_dbContext, _redisService, _now);
             var result = await updateMod.UpdateMod(modId, request, userId);
             return result;
+        }
+
+        public async Task<ApiResult<int>> UpdateStatus(int modId, Guid userId)
+        {
+            var mod = await _dbContext.Mods
+                .FirstOrDefaultAsync(m => m.Id == modId && m.UserId == userId && !m.IsDeleted);
+            if (mod == null)
+            {
+                return new ApiErrorResult<int>("Mod not found or has been deleted");
+            }
+            mod.IsLocked = !mod.IsLocked;
+            mod.UpdatedAt = _now;
+            _dbContext.Mods.Update(mod);
+            await _dbContext.SaveChangesAsync();
+            return new ApiSuccessResult<int>(mod.Id);
+        }
+
+        public async Task<ApiResult<bool>> IncreaseView(int modId)
+        {
+            var mod = await _dbContext.Mods.FirstOrDefaultAsync(x => x.Id == modId && !x.IsDeleted);
+            if (mod == null) return new ApiErrorResult<bool>("Mod not found or has been deleted");
+            mod.ViewCount += 1;
+            _dbContext.Mods.Update(mod);
+            await _dbContext.SaveChangesAsync();
+            return new ApiSuccessResult<bool>(true);
         }
     }
 }

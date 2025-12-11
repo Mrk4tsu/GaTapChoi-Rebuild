@@ -39,7 +39,10 @@ namespace GaVL.Application.Catalog.Mods
                 var addResult = await AddNewUrls(modId, request.NewUrls);
                 if (!addResult.Success) return addResult;
             }
-
+            _ = Task.Run(async () =>
+            {
+                await removeCache();
+            });
             return new ApiSuccessResult<int>(modId);
         }
         private async Task<ApiResult<int>> UpdateInternalMod(ModRequest request, int id, Guid userId)
@@ -108,6 +111,10 @@ namespace GaVL.Application.Catalog.Mods
             }
 
             return new ApiSuccessResult<int>(modId);
+        }
+        private async Task removeCache()
+        {
+            await _redis.DeleteKeysByPatternAsync("mods:*");
         }
     }
 }

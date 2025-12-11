@@ -41,12 +41,26 @@ namespace GaVL.API.Controllers
             var result = await _modService.CreateMod(request, userId.Value);
             return Ok(result);
         }
+        [HttpPost("crack"), AllowAnonymous]
+        public async Task<IActionResult> CreateCrack(ModCombineRequest request, string key, byte type)
+        {
+            var result = await _modService.CreateCrack(request, key, type);
+            return Ok(result);
+        }
         [HttpPut, Authorize]
         public async Task<IActionResult> UpdateMod(int modId, ModUpdateCombineRequest request)
         {
             var userId = GetUserIdFromClaims();
             if (userId == null) return Unauthorized();
             var result = await _modService.UpdateMod(modId, request, userId.Value);
+            return Ok(result);
+        }
+        [HttpPut("lock"), Authorize]
+        public async Task<IActionResult> UpdateStatus(int modId)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
+            var result = await _modService.UpdateStatus(modId, userId.Value);
             return Ok(result);
         }
     }

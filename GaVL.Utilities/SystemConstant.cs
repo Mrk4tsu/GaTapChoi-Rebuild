@@ -9,6 +9,7 @@
         public const string APP_URL_SETTING = "AppUrl";
         public const string R2_OPTION = "CloudflareR2";
         public const string TURNSTILE = "TurnstileSettings";
+        public const string MODDER_SETTING = "KeyModder";
 
         public const string CACHE_MOD = "mod";
         public const string CACHE_NOTIFY = "notify";
