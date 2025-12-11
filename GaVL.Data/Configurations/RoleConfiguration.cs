@@ -10,7 +10,7 @@ namespace GaVL.Data.Configurations
         {
             builder.ToTable("roles");
             builder.HasKey(r => r.Id);
-            builder.Property(x => x.Id).UseIdentityColumn();
+            builder.Property(x => x.Id).HasColumnName("id").UseIdentityColumn();
             builder.Property(r => r.Name).IsRequired().HasMaxLength(50).HasColumnName("name");
             builder.Property(r => r.Description).HasMaxLength(200).HasColumnName("description");
 

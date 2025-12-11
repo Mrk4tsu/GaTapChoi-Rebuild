@@ -6,7 +6,6 @@ using GaVL.DTO.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net;
 
 namespace GaVL.Application.Auths
 {
@@ -48,16 +47,6 @@ namespace GaVL.Application.Auths
             }
             var accessToken = await _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
-            //var userRefreshToken = new UserRefreshToken
-            //{
-            //    UserId = user.Id,
-            //    RefreshToken = refreshToken,
-            //    ExpiresAt = DateTime.UtcNow.AddDays(
-            //    double.Parse(_configuration["JwtSettings:RefreshTokenExpirationDays"])),
-            //    CreatedAt = DateTime.UtcNow,
-            //    CreatedByIp = ipAddress,
-            //    IsRevoked = false
-            //};
             var loginResult = new TokenResponse()
             {
                 AccessToken = accessToken,
@@ -77,7 +66,7 @@ namespace GaVL.Application.Auths
                 Username = request.Username,
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                AvatarUrl = request.AvatarUrl,
+                AvatarUrl = $"assets/images/avatars/{request.AvatarIndex}.png",
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true,
                 LastLoginAt = null

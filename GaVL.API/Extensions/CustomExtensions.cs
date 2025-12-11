@@ -1,5 +1,8 @@
-﻿using GaVL.Data;
+﻿using GaVL.Application.Systems;
+using GaVL.Data;
+using GaVL.DTO.Settings;
 using GaVL.Utilities;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -74,6 +77,37 @@ namespace GaVL.API.Extensions
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            return app;
+        }
+        public static IServiceCollection AddSmtpConfig(this IServiceCollection services, IConfiguration config)
+        {
+            services.Configure<MailJetSetting>(config.GetSection(SystemConstant.SMTP_SETTINGS));
+            services.AddSingleton<IMailService, MailService>();
+            return services;
+        }
+        public static IApplicationBuilder ConfigureCORS(this IApplicationBuilder app)
+        {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
+            var allowedOrigins = new string[]
+            {
+                "http://localhost:4200",
+                "https://gavl.io.vn",
+                "https://www.gavl.io.vn",
+                "https://forum.gavl.io.vn",
+                "http://127.0.0.1:8787",
+                "https://www.forum.gavl.io.vn"
+            };
+
+            app.UseCors(options =>
+                options.WithOrigins(allowedOrigins)
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials());
+
             return app;
         }
     }

@@ -12,5 +12,6 @@
         public bool IsActive { get; set; }
         public DateTime? LastLoginAt { get; set; }
         public Role Role { get; set; }
+        public List<Mod> Mods { get; set; }
     }
 }
