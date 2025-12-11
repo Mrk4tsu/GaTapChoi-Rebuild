@@ -16,6 +16,7 @@ namespace GaVL.Application.Auths
         Task<string> GenerateAccessToken(User user);
         string GenerateRefreshToken();
         ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+        bool ValidateRefreshToken(string refreshToken);
     }
     public class TokenService : ITokenService
     {
@@ -76,6 +77,11 @@ namespace GaVL.Application.Auths
             if (securityToken is not JwtSecurityToken jwtSecurityToken ||!jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,StringComparison.InvariantCultureIgnoreCase))
                 throw new SecurityTokenException("Invalid token");
             return principal;
+        }
+
+        public bool ValidateRefreshToken(string refreshToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,10 +1,11 @@
 ﻿using GaVL.Application.Auths;
 using GaVL.DTO.Auths;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GaVL.API.Controllers
 {
-    [Route("api/auth")]
+    [Route("api/auth"), AllowAnonymous]
     [ApiController]
     public class AuthsController : ControllerBase
     {      
@@ -36,6 +37,18 @@ namespace GaVL.API.Controllers
             else
             {
                 _logger.LogWarning("Login failed for user {Username}: {Message}", request.Username, result.Message);
+                return BadRequest(result);
+            }
+        }
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+        {
+            var result = await _authService.Refresh(request);
+            if (result.Success)
+                return Ok(result);
+            else
+            {
+                _logger.LogWarning("Token refresh failed: {Message}", result.Message);
                 return BadRequest(result);
             }
         }

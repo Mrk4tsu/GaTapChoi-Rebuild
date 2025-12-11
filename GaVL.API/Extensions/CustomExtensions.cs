@@ -34,6 +34,8 @@ namespace GaVL.API.Extensions
             if (string.IsNullOrEmpty(connectionStringRedis))
                 throw new ArgumentNullException(nameof(connectionStringRedis), "Redis connection string is missing.");
             services.AddSingleton<IConnectionMultiplexer>(sp => ConnectionMultiplexer.Connect(connectionStringRedis));
+
+            services.AddScoped<IRedisService, RedisService>();
             return services;
         }
         public static IServiceCollection AddSwaggerExplorer(this IServiceCollection services)
@@ -132,7 +134,7 @@ namespace GaVL.API.Extensions
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = config["JwtSettings:Issuer"],
                     ValidAudience = config["JwtSettings:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Secret"]!))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:SecretKey"]!))
                 };
             });
 
