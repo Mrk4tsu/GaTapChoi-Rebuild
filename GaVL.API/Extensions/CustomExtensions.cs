@@ -1,10 +1,19 @@
-﻿using GaVL.Data;
+﻿using GaVL.Application.Auths;
+using GaVL.Application.Systems;
+using GaVL.Data;
+using GaVL.DTO.Settings;
 using GaVL.Utilities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace GaVL.API.Extensions
 {
@@ -13,12 +22,12 @@ namespace GaVL.API.Extensions
         public static IServiceCollection ConfigureDbContext(this IServiceCollection services, IConfiguration config)
         {
             var connectionString = config.GetConnectionString(SystemConstant.DB_CONNECTION_STRING);
-            if(string.IsNullOrEmpty(connectionString)) 
+            if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException(nameof(connectionString), "Database connection string is missing.");
             services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlServer(config.GetConnectionString(connectionString),
+                    options.UseSqlServer(connectionString,
                     sqlOptions => sqlOptions.EnableRetryOnFailure()));
-            //services.AddSingleton<IDbConnection>(sp => new SqlConnection(connectionString));
+            services.AddSingleton<IDbConnection>(sp => new SqlConnection(connectionString));
             return services;
         }
         public static IServiceCollection ConfigureRedis(this IServiceCollection services, IConfiguration config)
@@ -27,6 +36,8 @@ namespace GaVL.API.Extensions
             if (string.IsNullOrEmpty(connectionStringRedis))
                 throw new ArgumentNullException(nameof(connectionStringRedis), "Redis connection string is missing.");
             services.AddSingleton<IConnectionMultiplexer>(sp => ConnectionMultiplexer.Connect(connectionStringRedis));
+
+            services.AddScoped<IRedisService, RedisService>();
             return services;
         }
         public static IServiceCollection AddSwaggerExplorer(this IServiceCollection services)
@@ -74,6 +85,86 @@ namespace GaVL.API.Extensions
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            return app;
+        }
+        public static IServiceCollection AddSmtpConfig(this IServiceCollection services, IConfiguration config)
+        {
+            services.Configure<MailJetSetting>(config.GetSection(SystemConstant.SMTP_SETTINGS));
+            services.AddSingleton<IMailService, MailService>();
+            return services;
+        }
+        public static IApplicationBuilder ConfigureCORS(this IApplicationBuilder app)
+        {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
+            var allowedOrigins = new string[]
+            {
+                "http://localhost:4200",
+                "https://gavl.io.vn",
+                "https://www.gavl.io.vn",
+                "https://forum.gavl.io.vn",
+                "http://127.0.0.1:8787",
+                "https://www.forum.gavl.io.vn"
+            };
+
+            app.UseCors(options =>
+                options.WithOrigins(allowedOrigins)
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials());
+
+            return app;
+        }
+        public static IServiceCollection ConfigureJwt(this IServiceCollection services, IConfiguration config)
+        {
+            services.Configure<JwtSettings>(config.GetSection(SystemConstant.JWT_SETTING));
+            services.AddScoped<TokenService>();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = config["JwtSettings:Issuer"],
+                    ValidAudience = config["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:SecretKey"]!))
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var redis = context.HttpContext.RequestServices.GetRequiredService<IRedisService>();
+                        var token = context.SecurityToken as JsonWebToken;
+                        if (token == null)
+                        {
+                            context.Fail("Invalid token type.");
+                            return;
+                        }
+                        var blacklistKey = $"blacklist:{token.EncodedToken}";
+                        if (await redis.KeyExist(blacklistKey))
+                        {
+                            context.Fail("Token has been revoked.");
+                        }
+                    }
+                };
+            });
+
+            return services;
+        }
+        public static IApplicationBuilder AddIdentityAuthMiddlewares(this IApplicationBuilder app)
+        {
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
             return app;
         }
     }

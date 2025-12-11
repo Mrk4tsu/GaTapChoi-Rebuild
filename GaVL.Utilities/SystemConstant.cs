@@ -6,7 +6,9 @@
         public const string REDIS_CONNECTION_STRING = "Redis";
         public const string SMTP_SETTINGS = "MailJet";
         public const string JWT_SETTING = "JwtSettings";
+        public const string APP_URL_SETTING = "AppUrl";
         public const string R2_OPTION = "CloudflareR2";
+        public const string TURNSTILE = "TurnstileSettings";
 
         public const string CACHE_MOD = "mod";
         public const string CACHE_NOTIFY = "notify";

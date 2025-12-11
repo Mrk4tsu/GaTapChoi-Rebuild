@@ -1,18 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="Audit.EntityFramework.Core" Version="31.3.0" />
+		<PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
+		<PackageReference Include="Mailjet.Api" Version="3.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="Polly" Version="8.6.5" />
+		<PackageReference Include="StackExchange.Redis" Version="2.10.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\GaVL.Data\GaVL.Data.csproj" />
-    <ProjectReference Include="..\GaVL.DTO\GaVL.DTO.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\GaVL.Data\GaVL.Data.csproj" />
+		<ProjectReference Include="..\GaVL.DTO\GaVL.DTO.csproj" />
+	</ItemGroup>
 
 </Project>
