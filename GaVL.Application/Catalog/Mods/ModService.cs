@@ -20,10 +20,10 @@ namespace GaVL.Application.Catalog.Mods
         Task<ApiResult<SeoModDTO>> GetSeoModById(int modId);
         Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId);
         Task<ApiResult<int>> CreateCrack(ModCombineRequest request, string key, byte type);
-        Task<ApiResult<int>> UpdateMod(int modId, ModUpdateCombineRequest request,  Guid userId);
+        Task<ApiResult<int>> UpdateMod(int modId, ModUpdateCombineRequest request, Guid userId);
         Task<ApiResult<int>> UpdateStatus(int modId, Guid userId);
         Task<ApiResult<bool>> IncreaseView(int modId);
-
+        Task<ApiResult<bool>> DeleteMod(int modId, Guid userId);
     }
     public class ModService : IModService
     {
@@ -71,7 +71,7 @@ namespace GaVL.Application.Catalog.Mods
 
             var totalRecords = await query.CountAsync();
             var mods = await query
-            .OrderBy(m => m.CreatedAt)
+            .OrderByDescending(x => x.UpdatedAt)
             .Skip((request.PageIndex - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync();
@@ -84,6 +84,7 @@ namespace GaVL.Application.Catalog.Mods
                 UpdatedAt = m.UpdatedAt,
                 Username = m.User.Username,
                 CategoryName = m.Category.Name,
+                CategoryId = m.Category.Id,
                 CrackType = m.CrackType,
                 SeoAlias = m.SeoAlias,
                 IsPrivate = m.IsPrivate
@@ -120,26 +121,29 @@ namespace GaVL.Application.Catalog.Mods
         public async Task<ApiResult<ModDetailDTO>> GetModById(int modId)
         {
             var mod = await _dbContext.Mods.AsNoTracking()
-                .Include(m => m.User)
-                .FirstOrDefaultAsync(m => m.Id == modId && !m.IsDeleted);
-            if (mod == null)
-            {
-                return new ApiErrorResult<ModDetailDTO>("Mod not found");
-            }
-            var modDetailDto = new ModDetailDTO
-            {
-                Id = mod.Id,
-                Name = mod.Name,
-                Description = mod.Description,
-                CreatedAt = mod.CreatedAt,
-                UpdatedAt = mod.UpdatedAt,
-                Username = mod.User.Username,
-                CrackType = mod.CrackType,
-                SeoAlias = mod.SeoAlias,
-                IsPrivate = mod.IsPrivate,
-                ViewCount = mod.ViewCount
-            };
-            return new ApiSuccessResult<ModDetailDTO>(modDetailDto);
+               .Where(m => m.Id == modId && !m.IsDeleted)
+               .Select(x => new ModDetailDTO
+               {
+                   Id = x.Id,
+                   AuthorId = x.UserId,
+                   Name = x.Name,
+                   Description = x.Description,
+                   CreatedAt = x.CreatedAt,
+                   UpdatedAt = x.UpdatedAt,
+                   Username = x.User.Username,
+                   CrackType = x.CrackType,
+                   SeoAlias = x.SeoAlias,
+                   IsPrivate = x.IsPrivate,
+                   ViewCount = x.ViewCount,
+                   Urls = x.Urls
+                        .Where(u => !u.IsDeleted)
+                        .Select(u => new UrlModDTO
+                        {
+                            Id = u.Id,
+                            Url = u.UrlString
+                        }).ToList()
+               }).FirstOrDefaultAsync();
+            return new ApiSuccessResult<ModDetailDTO>(mod);
         }
 
         public async Task<ApiResult<SeoModDTO>> GetSeoModById(int modId)
@@ -152,7 +156,7 @@ namespace GaVL.Application.Catalog.Mods
             }
             var mod = await _dbContext.Mods.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == modId && !m.IsDeleted);
-            if (mod == null) 
+            if (mod == null)
             {
                 return new ApiErrorResult<SeoModDTO>("Mod not found");
             }
@@ -193,6 +197,19 @@ namespace GaVL.Application.Catalog.Mods
             var mod = await _dbContext.Mods.FirstOrDefaultAsync(x => x.Id == modId && !x.IsDeleted);
             if (mod == null) return new ApiErrorResult<bool>("Mod not found or has been deleted");
             mod.ViewCount += 1;
+            _dbContext.Mods.Update(mod);
+            await _dbContext.SaveChangesAsync();
+            return new ApiSuccessResult<bool>(true);
+        }
+
+        public async Task<ApiResult<bool>> DeleteMod(int modId, Guid userId)
+        {
+            var mod = await _dbContext.Mods
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(m => m.Id == modId && !m.IsDeleted && m.UserId == userId);
+            if (mod == null)
+                return new ApiErrorResult<bool>("Mod not found or has been deleted");
+            mod.IsDeleted = true;
             _dbContext.Mods.Update(mod);
             await _dbContext.SaveChangesAsync();
             return new ApiSuccessResult<bool>(true);

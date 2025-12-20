@@ -1,7 +1,6 @@
 ﻿using GaVL.Application.Catalog.Mods;
 using GaVL.DTO.Mods;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GaVL.API.Controllers
@@ -61,6 +60,14 @@ namespace GaVL.API.Controllers
             var userId = GetUserIdFromClaims();
             if (userId == null) return Unauthorized();
             var result = await _modService.UpdateStatus(modId, userId.Value);
+            return Ok(result);
+        }
+        [HttpDelete, Authorize]
+        public async Task<IActionResult> DeleteMod(int modId)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
+            var result = await _modService.DeleteMod(modId, userId.Value);
             return Ok(result);
         }
     }

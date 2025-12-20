@@ -12,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Data;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 namespace GaVL.API.Extensions
