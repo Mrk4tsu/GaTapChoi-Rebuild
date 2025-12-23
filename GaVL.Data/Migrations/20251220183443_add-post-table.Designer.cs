@@ -4,6 +4,7 @@ using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251220183443_add-post-table")]
+    partial class addposttable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -133,21 +136,14 @@ namespace GaVL.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)")
-                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 12, 20, 19, 26, 10, 364, DateTimeKind.Utc).AddTicks(8686))
+                        .HasDefaultValue(new DateTime(2025, 12, 20, 18, 34, 42, 922, DateTimeKind.Utc).AddTicks(800))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -175,14 +171,12 @@ namespace GaVL.Data.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("title");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 12, 20, 19, 26, 10, 364, DateTimeKind.Utc).AddTicks(9008))
+                        .HasDefaultValue(new DateTime(2025, 12, 20, 18, 34, 42, 922, DateTimeKind.Utc).AddTicks(1291))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")
@@ -190,8 +184,6 @@ namespace GaVL.Data.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Code");
 
                     b.HasIndex("IsDeleted");
 
@@ -274,7 +266,7 @@ namespace GaVL.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasDefaultValue(new Guid("17a64a25-9b55-4e1a-8ef7-69d0f56f2af2"))
+                        .HasDefaultValue(new Guid("9377d8eb-0056-481e-ac76-87d24ea3a976"))
                         .HasColumnName("id");
 
                     b.Property<string>("AvatarUrl")

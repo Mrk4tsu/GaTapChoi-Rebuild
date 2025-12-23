@@ -4,6 +4,7 @@ using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251220183641_update-prop-post-table")]
+    partial class updatepropposttable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -133,21 +136,14 @@ namespace GaVL.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)")
-                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 12, 20, 19, 26, 10, 364, DateTimeKind.Utc).AddTicks(8686))
+                        .HasDefaultValue(new DateTime(2025, 12, 20, 18, 36, 40, 681, DateTimeKind.Utc).AddTicks(6806))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -182,7 +178,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 12, 20, 19, 26, 10, 364, DateTimeKind.Utc).AddTicks(9008))
+                        .HasDefaultValue(new DateTime(2025, 12, 20, 18, 36, 40, 681, DateTimeKind.Utc).AddTicks(7127))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")
@@ -190,8 +186,6 @@ namespace GaVL.Data.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Code");
 
                     b.HasIndex("IsDeleted");
 
@@ -274,7 +268,7 @@ namespace GaVL.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasDefaultValue(new Guid("17a64a25-9b55-4e1a-8ef7-69d0f56f2af2"))
+                        .HasDefaultValue(new Guid("b249d544-c721-4502-a172-0ca80dc8f5f2"))
                         .HasColumnName("id");
 
                     b.Property<string>("AvatarUrl")

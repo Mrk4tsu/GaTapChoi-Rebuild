@@ -4,6 +4,7 @@ using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251220192359_add-prop-post")]
+    partial class addproppost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,7 +150,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 12, 20, 19, 26, 10, 364, DateTimeKind.Utc).AddTicks(8686))
+                        .HasDefaultValue(new DateTime(2025, 12, 20, 19, 23, 59, 155, DateTimeKind.Utc).AddTicks(9367))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -182,7 +185,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 12, 20, 19, 26, 10, 364, DateTimeKind.Utc).AddTicks(9008))
+                        .HasDefaultValue(new DateTime(2025, 12, 20, 19, 23, 59, 155, DateTimeKind.Utc).AddTicks(9705))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")
@@ -190,8 +193,6 @@ namespace GaVL.Data.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Code");
 
                     b.HasIndex("IsDeleted");
 
@@ -274,7 +275,7 @@ namespace GaVL.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasDefaultValue(new Guid("17a64a25-9b55-4e1a-8ef7-69d0f56f2af2"))
+                        .HasDefaultValue(new Guid("5ec9d72e-db34-483e-8ca3-ef743af736ff"))
                         .HasColumnName("id");
 
                     b.Property<string>("AvatarUrl")

@@ -17,5 +17,6 @@ namespace GaVL.Data
         public DbSet<Mod> Mods { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Url> Urls { get; set; }
+        public DbSet<Post> Posts { get; set; }
     }
 }
