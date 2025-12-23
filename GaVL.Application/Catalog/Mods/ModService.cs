@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using GaVL.Application.Systems;
+﻿using GaVL.Application.Systems;
 using GaVL.Data;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Mods;
@@ -7,7 +6,6 @@ using GaVL.DTO.Paging;
 using GaVL.DTO.Settings;
 using GaVL.Utilities;
 using Markdig;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 

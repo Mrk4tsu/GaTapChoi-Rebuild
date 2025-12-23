@@ -32,6 +32,7 @@ namespace GaVL.Data.Configurations
             builder.HasIndex(x => x.IsDeleted);
             builder.HasIndex(x => x.IsPrivate);
             builder.HasIndex(x => x.UserId);
+            builder.HasIndex(x => x.CategoryId);
         }
     }
 }

@@ -15,8 +15,7 @@ namespace GaVL.Data
             .Build();
             var connectionString = configuration.GetConnectionString(SystemConstant.DB_CONNECTION_STRING);
             var optionBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionBuilder.UseSqlServer(connectionString);
-
+            optionBuilder.UseNpgsql(connectionString);
             return new AppDbContext(optionBuilder.Options);
         }
     }

@@ -5,28 +5,48 @@ using GaVL.DTO.Settings;
 using GaVL.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
-using System.Data;
 using System.Text;
 
 namespace GaVL.API.Extensions
 {
     public static class CustomExtensions
     {
-        public static IServiceCollection ConfigureDbContext(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection ConfigureDbContext(this IServiceCollection services, IConfiguration config, IHostEnvironment env)  // Thêm IHostEnvironment để check env
         {
             var connectionString = config.GetConnectionString(SystemConstant.DB_CONNECTION_STRING);
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException(nameof(connectionString), "Database connection string is missing.");
+
             services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlServer(connectionString,
-                    sqlOptions => sqlOptions.EnableRetryOnFailure()));
-            services.AddSingleton<IDbConnection>(sp => new SqlConnection(connectionString));
+            {
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                {
+                    npgsqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(10),
+                        errorCodesToAdd: null);
+
+                    npgsqlOptions.CommandTimeout(30);
+                    npgsqlOptions.ProvideClientCertificatesCallback(cert => {
+                    });
+                });
+
+                if (env.IsDevelopment())
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.EnableDetailedErrors();
+                }
+                else
+                {
+                    options.LogTo(Console.WriteLine, LogLevel.Warning); 
+                }
+            });
+
             return services;
         }
         public static IServiceCollection ConfigureRedis(this IServiceCollection services, IConfiguration config)

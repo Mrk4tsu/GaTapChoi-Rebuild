@@ -16,6 +16,7 @@ namespace GaVL.Data.Configurations
 
             //Index
             builder.HasIndex(c => c.Name).IsUnique();
+            builder.HasIndex(x => x.Id);
         }
     }
 }

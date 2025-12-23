@@ -2,7 +2,7 @@ using GaVL.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.ConfigureDbContext(builder.Configuration)
+builder.Services.ConfigureDbContext(builder.Configuration, builder.Environment)
                 .ConfigureRedis(builder.Configuration)
                 .AddAuthorization()
                 .AddHttpContextAccessor()

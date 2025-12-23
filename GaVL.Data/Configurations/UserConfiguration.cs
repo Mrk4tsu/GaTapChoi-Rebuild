@@ -22,6 +22,7 @@ namespace GaVL.Data.Configurations
 
             //Index
             builder.HasIndex(u => u.Username).IsUnique();
+            builder.HasIndex(x => x.Id);
             builder.HasIndex(u => u.Email).IsUnique();
 
             //Relationships
