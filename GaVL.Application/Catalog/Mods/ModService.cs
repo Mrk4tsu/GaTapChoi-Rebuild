@@ -85,7 +85,8 @@ namespace GaVL.Application.Catalog.Mods
                 CategoryId = m.Category.Id,
                 CrackType = m.CrackType,
                 SeoAlias = m.SeoAlias,
-                IsPrivate = m.IsPrivate
+                IsPrivate = m.IsPrivate,
+                Thumbnail = m.Thumbnail
             }).ToList();
 
             var result = new PagedResult<ModDTO>

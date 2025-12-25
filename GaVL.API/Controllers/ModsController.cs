@@ -20,7 +20,7 @@ namespace GaVL.API.Controllers
             var result = await _modService.GetMods(request);
             return Ok(result);
         }
-        [HttpGet("get")]
+        [HttpGet("{modId}")]
         public async Task<IActionResult> GetModById(int modId)
         {
             var result = await _modService.GetModById(modId);

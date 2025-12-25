@@ -17,5 +17,7 @@
 
         public const string RESET_PASSWORD_TEMPLATE = "6955832";
         public const string REPLY_INFOMATION_TEMPLATE = "7408418";
+
+        public const string DEFAULT_IMG = "https://storage.gavl.io.vn/temp/0.png";
     }
 }
