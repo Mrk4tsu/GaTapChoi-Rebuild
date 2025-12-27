@@ -1,4 +1,5 @@
 ﻿using GaVL.Data.Entities;
+using GaVL.Data.ValueGenerators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,7 +11,7 @@ namespace GaVL.Data.Configurations
         {
             builder.ToTable("users");
             builder.HasKey(u => u.Id);
-            builder.Property(u => u.Id).HasColumnName("id").HasDefaultValue(Guid.NewGuid());
+            builder.Property(u => u.Id).HasColumnName("id").HasValueGenerator<UuidV7Generator>();
             builder.Property(u => u.Username).IsRequired().HasMaxLength(50).HasColumnName("username");
             builder.Property(u => u.Email).IsRequired().HasMaxLength(100).HasColumnName("email");
             builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(100).HasColumnName("password_hash");

@@ -10,9 +10,11 @@ namespace GaVL.API.Controllers
     public class ModsController : BasesController
     {
         private readonly IModService _modService;
-        public ModsController(IModService modService)
+        private readonly ILogger<ModsController> _logger;
+        public ModsController(IModService modService, ILogger<ModsController> logger)
         {
             _modService = modService;
+            _logger = logger;
         }
         [HttpGet]
         public async Task<IActionResult> GetMods([FromQuery] ModQueryRequest request)
@@ -23,11 +25,19 @@ namespace GaVL.API.Controllers
         [HttpGet("{modId}")]
         public async Task<IActionResult> GetModById(int modId)
         {
-            var result = await _modService.GetModById(modId);
-            return Ok(result);
+            try
+            {
+                var result = await _modService.GetModById(modId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting mod {ModId}", modId);
+                return StatusCode(500, new { message = "Internal server error" });
+            }
         }
         [HttpGet("seo")]
-        public async Task<IActionResult> GetModBySeoAlias(int modId)
+        public async Task<IActionResult> GetSeoMod(int modId)
         {
             var result = await _modService.GetSeoModById(modId);
             return Ok(result);
