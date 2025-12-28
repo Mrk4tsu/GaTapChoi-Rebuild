@@ -42,6 +42,12 @@ namespace GaVL.API.Controllers
             var result = await _modService.GetSeoModById(modId);
             return Ok(result);
         }
+        [HttpGet("inner")]
+        public async Task<IActionResult> GetInternalMod(int modId)
+        {
+            var result = await _modService.GetModInternalById(modId);
+            return Ok(result);
+        }
         [HttpPost, Authorize]
         public async Task<IActionResult> CreateMod(ModCombineRequest request)
         {

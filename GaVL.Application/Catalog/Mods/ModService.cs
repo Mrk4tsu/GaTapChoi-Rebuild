@@ -16,6 +16,7 @@ namespace GaVL.Application.Catalog.Mods
         Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request);
         Task<ApiResult<ModDetailDTO>> GetModById(int modId);
         Task<ApiResult<SeoModDTO>> GetSeoModById(int modId);
+        Task<ApiResult<ModInner>> GetModInternalById(int id);
         Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId);
         Task<ApiResult<int>> CreateCrack(ModCombineRequest request, string key, byte type);
         Task<ApiResult<int>> UpdateMod(int modId, ModUpdateCombineRequest request, Guid userId);
@@ -222,6 +223,28 @@ namespace GaVL.Application.Catalog.Mods
             _dbContext.Mods.Update(mod);
             await _dbContext.SaveChangesAsync();
             return new ApiSuccessResult<bool>(true);
+        }
+
+        public async Task<ApiResult<ModInner>> GetModInternalById(int id)
+        {
+            var mod = await _dbContext.Mods.Include(x => x.User).FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == id);
+            if (mod == null) return new ApiErrorResult<ModInner>("Mod not found or has been deleted");
+            var urls = await _dbContext.Urls.Where(x => x.ModId == id && !x.IsDeleted).Select(x => new UrlModDTO
+            {
+                Id = x.Id,
+                Url = x.UrlString
+            }).ToListAsync();
+            var modVM = new ModInner()
+            {
+                Id = mod.Id,
+                Title = mod.Name,
+                AuthorId = mod.UserId,
+                CategoryId = mod.CategoryId,
+                Description = mod.Description,
+                IsPrivate = mod.IsPrivate,
+                Urls = urls
+            };
+            return new ApiSuccessResult<ModInner>(modVM);
         }
     }
 }

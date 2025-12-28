@@ -18,7 +18,6 @@ namespace GaVL.Data.Entities
         public byte CategoryId { get; set; }
         public byte CrackType { get; set; }
         public string SeoAlias { get; set; }
-        public string Version { get; set; }
         public Category Category { get; set; }
         public bool IsPrivate { get; set; }
         public List<Url> Urls { get; set; } = new List<Url>();
