@@ -43,7 +43,7 @@ namespace GaVL.API.Extensions
                 }
                 else
                 {
-                    options.LogTo(Console.WriteLine, LogLevel.Warning); 
+                    options.LogTo(Console.WriteLine, LogLevel.Warning);
                 }
             });
 

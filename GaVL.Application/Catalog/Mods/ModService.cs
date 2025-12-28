@@ -16,6 +16,7 @@ namespace GaVL.Application.Catalog.Mods
         Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request);
         Task<ApiResult<ModDetailDTO>> GetModById(int modId);
         Task<ApiResult<SeoModDTO>> GetSeoModById(int modId);
+        Task<ApiResult<ModInner>> GetModInternalById(int id);
         Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId);
         Task<ApiResult<int>> CreateCrack(ModCombineRequest request, string key, byte type);
         Task<ApiResult<int>> UpdateMod(int modId, ModUpdateCombineRequest request, Guid userId);
@@ -85,7 +86,8 @@ namespace GaVL.Application.Catalog.Mods
                 CategoryId = m.Category.Id,
                 CrackType = m.CrackType,
                 SeoAlias = m.SeoAlias,
-                IsPrivate = m.IsPrivate
+                IsPrivate = m.IsPrivate,
+                Thumbnail = m.Thumbnail
             }).ToList();
 
             var result = new PagedResult<ModDTO>
@@ -118,6 +120,9 @@ namespace GaVL.Application.Catalog.Mods
         }
         public async Task<ApiResult<ModDetailDTO>> GetModById(int modId)
         {
+            var cacheKey = $"mod:detail:{modId}";
+            var cachedMod = await _redisService.GetValue<ModDetailDTO>(cacheKey);
+            if (cachedMod != null) return new ApiSuccessResult<ModDetailDTO>(cachedMod);
             var mod = await _dbContext.Mods.AsNoTracking()
                .Where(m => m.Id == modId && !m.IsDeleted)
                .Select(x => new ModDetailDTO
@@ -133,6 +138,7 @@ namespace GaVL.Application.Catalog.Mods
                    SeoAlias = x.SeoAlias,
                    IsPrivate = x.IsPrivate,
                    ViewCount = x.ViewCount,
+                   Thumbnail = x.Thumbnail,
                    Urls = x.Urls
                         .Where(u => !u.IsDeleted)
                         .Select(u => new UrlModDTO
@@ -141,7 +147,12 @@ namespace GaVL.Application.Catalog.Mods
                             Url = u.UrlString
                         }).ToList()
                }).FirstOrDefaultAsync();
-            return new ApiSuccessResult<ModDetailDTO>(mod);
+            if (mod != null)
+            {
+                await _redisService.SetValue(cacheKey, mod, TimeSpan.FromHours(1));
+                return new ApiSuccessResult<ModDetailDTO>(mod);
+            }
+            return new ApiErrorResult<ModDetailDTO>("Mod not found");
         }
 
         public async Task<ApiResult<SeoModDTO>> GetSeoModById(int modId)
@@ -162,9 +173,10 @@ namespace GaVL.Application.Catalog.Mods
             {
                 Id = mod.Id,
                 Name = mod.Name,
-                SeoAlias = mod.SeoAlias
+                SeoAlias = mod.SeoAlias,
+                Thumbnail = mod.Thumbnail
             };
-            await _redisService.SetValue(cacheKey, seoModDto, TimeSpan.FromDays(CacheExpiryValue));
+            await _redisService.SetValue(cacheKey, seoModDto);
             return new ApiSuccessResult<SeoModDTO>(seoModDto);
         }
 
@@ -211,6 +223,28 @@ namespace GaVL.Application.Catalog.Mods
             _dbContext.Mods.Update(mod);
             await _dbContext.SaveChangesAsync();
             return new ApiSuccessResult<bool>(true);
+        }
+
+        public async Task<ApiResult<ModInner>> GetModInternalById(int id)
+        {
+            var mod = await _dbContext.Mods.Include(x => x.User).FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == id);
+            if (mod == null) return new ApiErrorResult<ModInner>("Mod not found or has been deleted");
+            var urls = await _dbContext.Urls.Where(x => x.ModId == id && !x.IsDeleted).Select(x => new UrlModDTO
+            {
+                Id = x.Id,
+                Url = x.UrlString
+            }).ToListAsync();
+            var modVM = new ModInner()
+            {
+                Id = mod.Id,
+                Title = mod.Name,
+                AuthorId = mod.UserId,
+                CategoryId = mod.CategoryId,
+                Description = mod.Description,
+                IsPrivate = mod.IsPrivate,
+                Urls = urls
+            };
+            return new ApiSuccessResult<ModInner>(modVM);
         }
     }
 }

@@ -9,6 +9,7 @@ namespace GaVL.Data.Entities
         public string Description { get; set; } = string.Empty;
         public bool IsDeleted { get; set; } = false;
         public bool IsLocked { get; set; } = false;
+        public string Thumbnail { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public Guid UserId { get; set; }

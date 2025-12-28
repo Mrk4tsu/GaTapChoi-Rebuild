@@ -99,7 +99,6 @@ namespace GaVL.Application.Auths
             if (isExistUsername) return new ApiErrorResult<Guid>("Username is already taken.");
             var newUser = new User
             {
-                Id = Guid.NewGuid(),
                 Username = request.Username,
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),

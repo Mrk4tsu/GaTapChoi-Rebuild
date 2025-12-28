@@ -44,6 +44,7 @@ namespace GaVL.Application.Catalog.Mods
                 CategoryId = request.CategoryId,
                 IsPrivate = request.IsPrivate,
                 IsDeleted = false,
+                Thumbnail = $"https://storage.gavl.io.vn/temp/{request.CategoryId - 1}.png",
                 SeoAlias = StringHelper.GenerateSeoAlias(request.Name)
             };
             _db.Mods.Add(mod);

@@ -34,5 +34,11 @@ namespace GaVL.Utilities
             }
             return result.ToString();
         }
+        private string TruncateString(string text, int maxLength)
+        {
+            if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
+                return text;
+            return text.Substring(0, maxLength) + "...";
+        }
     }
 }

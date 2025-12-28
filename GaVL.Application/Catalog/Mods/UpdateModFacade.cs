@@ -112,9 +112,14 @@ namespace GaVL.Application.Catalog.Mods
 
             return new ApiSuccessResult<int>(modId);
         }
-        private async Task removeCache()
+        private async Task removeCache(int? modId = null)
         {
-            await _redis.DeleteKeysByPatternAsync("mods:*");
+            var cacheKey = $"mod:detail:{modId}";
+            await _redis.DeleteKeysByPatternAsync("mods:*"); 
+            if (modId.HasValue)
+            {
+                await _redis.DeleteKeysByPatternAsync(cacheKey);
+            }
         }
     }
 }
