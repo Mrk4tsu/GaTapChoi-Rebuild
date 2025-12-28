@@ -1,4 +1,5 @@
 ﻿using GaVL.Data.Entities;
+using GaVL.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -23,6 +24,7 @@ namespace GaVL.Data.Configurations
             builder.Property(m => m.CategoryId).IsRequired().HasColumnName("category_id");
             builder.Property(m => m.CrackType).IsRequired().HasColumnName("crack_type");
             builder.Property(m => m.SeoAlias).IsRequired().HasMaxLength(200).HasColumnName("seo_alias");
+            builder.Property(m => m.Thumbnail).IsRequired().HasDefaultValue(SystemConstant.DEFAULT_IMG).HasMaxLength(300).HasColumnName("thumbnail");
             // Relationships
             builder.HasOne(m => m.User).WithMany(u => u.Mods).HasForeignKey(m => m.UserId);
             builder.HasOne(m => m.Category).WithMany(c => c.Mods).HasForeignKey(m => m.CategoryId);
@@ -32,6 +34,7 @@ namespace GaVL.Data.Configurations
             builder.HasIndex(x => x.IsDeleted);
             builder.HasIndex(x => x.IsPrivate);
             builder.HasIndex(x => x.UserId);
+            builder.HasIndex(x => x.CategoryId);
         }
     }
 }

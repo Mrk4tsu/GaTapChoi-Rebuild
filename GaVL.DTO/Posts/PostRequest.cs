@@ -1,0 +1,11 @@
+﻿using Microsoft.AspNetCore.Http;
+
+namespace GaVL.DTO.Posts
+{
+    public class PostRequest
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public IFormFile Thumbnail { get; set; }
+    }
+}

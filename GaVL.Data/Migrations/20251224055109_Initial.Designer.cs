@@ -3,6 +3,7 @@ using System;
 using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251224055109_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,7 +160,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 12, 27, 7, 14, 24, 889, DateTimeKind.Utc).AddTicks(287))
+                        .HasDefaultValue(new DateTime(2025, 12, 24, 5, 51, 9, 246, DateTimeKind.Utc).AddTicks(2283))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -192,7 +195,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 12, 27, 7, 14, 24, 889, DateTimeKind.Utc).AddTicks(554))
+                        .HasDefaultValue(new DateTime(2025, 12, 24, 5, 51, 9, 246, DateTimeKind.Utc).AddTicks(2538))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")
@@ -284,6 +287,7 @@ namespace GaVL.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
+                        .HasDefaultValue(new Guid("73f232b7-75ce-4620-acc0-3b98956fd14f"))
                         .HasColumnName("id");
 
                     b.Property<string>("AvatarUrl")

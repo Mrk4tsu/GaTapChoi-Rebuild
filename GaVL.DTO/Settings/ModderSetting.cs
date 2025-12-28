@@ -3,7 +3,9 @@
     public class ModderSetting
     {
         public string EHVN { get; set; }
+        public string EHVNID { get; set; }
         public string MANHHDC { get; set; }
+        public string MANHHDCID { get; set; }
     }
     public class AppUrlSetting
     {
