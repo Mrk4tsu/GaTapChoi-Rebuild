@@ -17,7 +17,7 @@ namespace GaVL.API.Controllers
             _logger = logger;
         }
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromForm] RegisterRequest request)
         {
             var result = await _authService.Register(request);
             if (result.Success)
@@ -32,6 +32,18 @@ namespace GaVL.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authService.Login(request);
+            if (result.Success)
+                return Ok(result);
+            else
+            {
+                _logger.LogWarning("Login failed for user {Username}: {Message}", request.Username, result.Message);
+                return BadRequest(result);
+            }
+        }
+        [HttpPost("admin")]
+        public async Task<IActionResult> LoginDashboard([FromBody] LoginDashboardRequest request)
+        {
+            var result = await _authService.LoginDashboard(request);
             if (result.Success)
                 return Ok(result);
             else
