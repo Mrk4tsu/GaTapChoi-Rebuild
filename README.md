@@ -75,8 +75,8 @@ Vui lòng tuân thủ code style và thêm test nếu có thể.
 ### Giấy phép
 Dự án được cấp phép dưới GNU Affero General Public License v3.0 (AGPL-3.0). Bạn có thể sử dụng, sửa đổi, và phân phối miễn là tuân thủ các điều khoản của giấy phép, bao gồm việc công khai source code nếu deploy công khai.
 ### Liên hệ
-Owner: [Mrk4tsu](https://github.com/Mrk4tsu "Mrk4tsu")
-Website: [gavl.io.vn](https://gavl.io.vn/ "gavl.io.vn")
+Owner: [Mrk4tsu](https://github.com/Mrk4tsu "Mrk4tsu") <br>
+Website: [gavl.io.vn](https://gavl.io.vn/ "gavl.io.vn") <br>
 Nếu có vấn đề, mở issue trên GitHub.
 
 Cảm ơn bạn đã quan tâm đến dự án!
