@@ -122,11 +122,10 @@ namespace GaVL.API.Extensions
             var allowedOrigins = new string[]
             {
                 "http://localhost:4200",
+                "https://admin.gavl.io.vn",
                 "https://gavl.io.vn",
-                "https://www.gavl.io.vn",
                 "https://forum.gavl.io.vn",
                 "http://127.0.0.1:8787",
-                "https://www.forum.gavl.io.vn"
             };
 
             app.UseCors(options =>

@@ -103,6 +103,11 @@ namespace GaVL.Application.Catalog.Mods
 
         public async Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId)
         {
+            var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+            if (user != null && user.RoleId > 3)
+            {
+                return new ApiErrorResult<int>("Bạn không có quyền thực hiện thao tác này");
+            }
             var createMod = new CreateModFacade(_dbContext, _redisService, _now);
             var result = await createMod.CreateMod(request, userId);
             return result;

@@ -11,7 +11,7 @@ namespace GaVL.Data.Configurations
         {
             builder.ToTable("mods");
             builder.HasKey(m => m.Id);
-            builder.Property(m => m.Id).HasColumnName("id").UseIdentityColumn();
+            builder.Property(m => m.Id).HasColumnName("id").ValueGeneratedOnAdd();
             builder.Property(m => m.Name).IsRequired().HasMaxLength(150).HasColumnName("name");
             builder.Property(m => m.Description).HasColumnName("description");
             builder.Property(m => m.IsPrivate).IsRequired().HasMaxLength(50).HasColumnName("is_private");

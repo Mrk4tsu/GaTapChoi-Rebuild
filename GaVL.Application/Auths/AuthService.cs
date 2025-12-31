@@ -21,6 +21,7 @@ namespace GaVL.Application.Auths
     {
         Task<ApiResult<Guid>> Register(RegisterRequest request);
         Task<ApiResult<TokenResponse>> Login(LoginRequest request);
+        Task<ApiResult<TokenResponse>> LoginDashboard(LoginDashboardRequest request);
         Task<ApiResult<TokenResponse>> Refresh(RefreshRequest request);
         Task<ApiResult<bool>> Logout(LogoutRequest request);
         Task<ApiResult<bool>> ForgotPassword(ForgotPasswordRequest request);
@@ -37,8 +38,10 @@ namespace GaVL.Application.Auths
         private readonly ITokenService _tokenService;
         private readonly IRedisService _redisService;
         private readonly IMailService _mailService;
+        private readonly IR2Service _r2Service;
         public AuthService(AppDbContext dbContext,
             ILogger<AuthService> logger,
+            IR2Service r2Service,
             IConfiguration configuration,
             IMailService mailService,
             ITokenService tokenService,
@@ -55,8 +58,43 @@ namespace GaVL.Application.Auths
             _appUrlSetting = urlSetting.Value;
             _redisService = redisService;
             _mailService = mailService;
+            _r2Service = r2Service;
         }
+        public async Task<ApiResult<TokenResponse>> LoginDashboard(LoginDashboardRequest request)
+        {
+            var user = await _dbContext.Users
+            .AsNoTracking()
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Username == request.Username);
+            if (user == null)
+            {
+                return new ApiErrorResult<TokenResponse>("Invalid username or password.");
+            }
+            if (user.Role == null || user.RoleId > 3)
+            {
+                return new ApiErrorResult<TokenResponse>("Access denied. Admins or Modderator only.");
+            }
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+            if (!isPasswordValid)
+            {
+                return new ApiErrorResult<TokenResponse>("Invalid username or password.");
+            }
+            var accessToken = await _tokenService.GenerateAccessToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
 
+            var sessionId = Guid.NewGuid().ToString();
+            var refreshKey = $"refresh:{user.Id}:{sessionId}";
+            await _redisService.SetAsync(refreshKey, refreshToken, TimeSpan.FromDays(_jwtSettings.RefreshTokenExpirationDays));
+
+            var loginResult = new TokenResponse()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                SessionId = sessionId
+            };
+            return new ApiSuccessResult<TokenResponse>(loginResult, "Login successful.");
+        }
         public async Task<ApiResult<TokenResponse>> Login(LoginRequest request)
         {
             var isValidCaptcha = await _turnstileService.ValidateTokenAsync(request.CaptchaToken);
@@ -97,12 +135,30 @@ namespace GaVL.Application.Auths
         {
             var isExistUsername = await isExistUsernameInDatabase(request.Username);
             if (isExistUsername) return new ApiErrorResult<Guid>("Username is already taken.");
+
+            var isValidCaptcha = await _turnstileService.ValidateTokenAsync(request.CaptchaToken);
+            if (!isValidCaptcha) return new ApiErrorResult<Guid>("CAPTCHA validation failed.");
+
+            string? avatarUrl = null;
+            if (request.Avatar == null)
+            {
+                avatarUrl = "https://gavl.io.vn/assets/img/avatars/2212.png";
+            }
+            else
+            {
+                var fileExtension = Path.GetExtension(request.Avatar.FileName);
+                avatarUrl = await _r2Service.UploadFileGetUrl(request.Avatar, $"upload/{request.Username}/{request.Username}{fileExtension}");
+                if (string.IsNullOrEmpty(avatarUrl))
+                {
+                    return new ApiErrorResult<Guid>("Upload ảnh không thành công");
+                }
+            }  
             var newUser = new User
             {
                 Username = request.Username,
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                AvatarUrl = $"assets/images/avatars/{request.AvatarIndex}.png",
+                AvatarUrl = avatarUrl,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true,
                 LastLoginAt = null
@@ -110,7 +166,7 @@ namespace GaVL.Application.Auths
 
             await _dbContext.Users.AddAsync(newUser);
             await _dbContext.SaveChangesAsync();
-            return new ApiSuccessResult<Guid>(newUser.Id, "User registered successfully.");
+            return new ApiSuccessResult<Guid>(newUser.Id, "Đăng ký tài khoản thành công.");
         }
         private async Task<bool> isExistUsernameInDatabase(string username) => await _dbContext.Users.AnyAsync(u => u.Username == username);
 
@@ -166,7 +222,7 @@ namespace GaVL.Application.Auths
 
             var appUrl = _appUrlSetting.Forum;
             var resetLink = $"{appUrl}/confirm-password?token={resetToken}&email={request.Email}";
-            var objects = new JObject{{"plink", resetLink } };
+            var objects = new JObject { { "plink", resetLink } };
             await _mailService.SendMail(request.Email, $"Xác nhận khôi phục mật khẩu", SystemConstant.RESET_PASSWORD_TEMPLATE, objects);
             return new ApiSuccessResult<bool>(true, "If the email is registered, a reset link has been sent.");
         }
