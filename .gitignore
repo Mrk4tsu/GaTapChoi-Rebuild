@@ -367,3 +367,5 @@ appsettings.Development.json
 /GaVL.API/Properties/ServiceDependencies/api-gavl - Web Deploy
 /GaVL.API/Properties/serviceDependencies.api-gavl - Web Deploy.json
 /GaVL.API/Properties/serviceDependencies.json
+/GaVL.API/Properties/ServiceDependencies/api-preventive - Web Deploy/apis1.arm.json
+/GaVL.API/Properties/serviceDependencies.api-preventive - Web Deploy.json

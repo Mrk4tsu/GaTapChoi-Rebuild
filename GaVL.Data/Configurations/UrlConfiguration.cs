@@ -10,7 +10,7 @@ namespace GaVL.Data.Configurations
         {
             builder.ToTable("urls");
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id).HasColumnName("id").UseIdentityColumn();
+            builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();
             builder.Property(x => x.UrlString).HasColumnName("url_string").IsRequired().HasMaxLength(2048);
             builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsRequired();
             builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsRequired();

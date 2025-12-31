@@ -3,6 +3,7 @@ using System;
 using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251229055001_Update-Id-Url")]
+    partial class UpdateIdUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,7 +160,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 12, 29, 6, 1, 25, 165, DateTimeKind.Utc).AddTicks(7964))
+                        .HasDefaultValue(new DateTime(2025, 12, 29, 5, 50, 1, 162, DateTimeKind.Utc).AddTicks(1965))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -192,7 +195,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 12, 29, 6, 1, 25, 165, DateTimeKind.Utc).AddTicks(8240))
+                        .HasDefaultValue(new DateTime(2025, 12, 29, 5, 50, 1, 162, DateTimeKind.Utc).AddTicks(2229))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")

@@ -107,7 +107,7 @@ namespace GaVL.Application.Systems
             var response = await _s3Client.PutObjectAsync(putRequest);
             if (response.HttpStatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw new Exception($"Upload failed: {response.HttpStatusCode}");
+                return string.Empty;
             }
             return $"{_options.PublicEndpoint}/{key}";
         }
