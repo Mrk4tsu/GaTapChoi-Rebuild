@@ -14,5 +14,6 @@
         public Role Role { get; set; }
         public List<Mod> Mods { get; set; }
         public List<Post> Posts { get; set; }
+        public List<Comment> Comments { get; set; }
     }
 }

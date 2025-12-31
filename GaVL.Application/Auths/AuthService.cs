@@ -130,7 +130,6 @@ namespace GaVL.Application.Auths
             };
             return new ApiSuccessResult<TokenResponse>(loginResult, "Login successful.");
         }
-
         public async Task<ApiResult<Guid>> Register(RegisterRequest request)
         {
             var isExistUsername = await isExistUsernameInDatabase(request.Username);
@@ -169,7 +168,6 @@ namespace GaVL.Application.Auths
             return new ApiSuccessResult<Guid>(newUser.Id, "Đăng ký tài khoản thành công.");
         }
         private async Task<bool> isExistUsernameInDatabase(string username) => await _dbContext.Users.AnyAsync(u => u.Username == username);
-
         public async Task<ApiResult<TokenResponse>> Refresh(RefreshRequest request)
         {
             var principal = _tokenService.GetPrincipalFromExpiredToken(request.AccessToken);
@@ -193,7 +191,6 @@ namespace GaVL.Application.Auths
             };
             return new ApiSuccessResult<TokenResponse>(result, "Token refreshed successfully.");
         }
-
         public async Task<ApiResult<bool>> Logout(LogoutRequest request)
         {
             var principal = _tokenService.GetPrincipalFromExpiredToken(request.AccessToken);
@@ -211,29 +208,21 @@ namespace GaVL.Application.Auths
             }
             return new ApiSuccessResult<bool>(true, "Logged out successfully.");
         }
-
         public async Task<ApiResult<bool>> ForgotPassword(ForgotPasswordRequest request)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user == null) return new ApiSuccessResult<bool>(true, "If the email is registered, a reset link has been sent.");
             var resetToken = GenerateResetToken();
             var resetKey = $"reset:{user.Id}";
-            await _redisService.SetAsync(resetKey, resetToken, TimeSpan.FromMinutes(30));
+            var userEmail = user.Email;
+            await _redisService.SetAsync(resetKey, resetToken, TimeSpan.FromMinutes(15));
 
-            var appUrl = _appUrlSetting.Forum;
-            var resetLink = $"{appUrl}/confirm-password?token={resetToken}&email={request.Email}";
+            var appUrl = _appUrlSetting.Website;
+            var resetLink = $"{appUrl}/confirm-password?token={resetToken}&email={userEmail}";
             var objects = new JObject { { "plink", resetLink } };
-            await _mailService.SendMail(request.Email, $"Xác nhận khôi phục mật khẩu", SystemConstant.RESET_PASSWORD_TEMPLATE, objects);
-            return new ApiSuccessResult<bool>(true, "If the email is registered, a reset link has been sent.");
+            await _mailService.SendMail(userEmail, $"Xác nhận khôi phục mật khẩu", SystemConstant.RESET_PASSWORD_TEMPLATE, objects);
+            return new ApiSuccessResult<bool>(true, MaskEmail(userEmail));
         }
-        private string GenerateResetToken()
-        {
-            var randomNumber = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber).Replace("+", "").Replace("/", "").Replace("=", "");  // URL-safe
-        }
-
         public async Task<ApiResult<bool>> ResetPassword(ResetPasswordRequest request)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
@@ -247,6 +236,20 @@ namespace GaVL.Application.Auths
 
             await _redisService.RemoveKeyAsync(resetKey);
             return new ApiSuccessResult<bool>(true, "Password has been reset successfully.");
+        }
+        private string GenerateResetToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber).Replace("+", "").Replace("/", "").Replace("=", "");  // URL-safe
+        }
+        private string MaskEmail(string email)
+        {
+            var parts = email.Split('@');
+            var localPart = parts[0];
+            var visiblePart = localPart.Substring(Math.Max(0, localPart.Length - 3));
+            return $"***{visiblePart}@{parts[1]}";
         }
     }
 }

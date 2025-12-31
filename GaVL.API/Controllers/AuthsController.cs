@@ -84,7 +84,19 @@ namespace GaVL.API.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogWarning("Forgot password failed for email {Email}: {Message}", request.Email, result.Message);
+                _logger.LogWarning("Forgot password failed for email {Email}: {Message}", request.Username, result.Message);
+                return BadRequest(result);
+            }
+        }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _authService.ResetPassword(request);
+            if (result.Success)
+                return Ok(result);
+            else
+            {
+                _logger.LogWarning("Reset password failed for email {Email}: {Message}", request.Email, result.Message);
                 return BadRequest(result);
             }
         }

@@ -1,5 +1,6 @@
 ﻿using GaVL.Application.Catalog.Mods;
 using GaVL.DTO.Mods;
+using GaVL.DTO.Paging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,14 @@ namespace GaVL.API.Controllers
         public async Task<IActionResult> GetMods([FromQuery] ModQueryRequest request)
         {
             var result = await _modService.GetMods(request);
+            return Ok(result);
+        }
+        [HttpGet("mine"), Authorize]
+        public async Task<IActionResult> GetModsByUser([FromQuery] PagingRequest request)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
+            var result = await _modService.GetModsByUserId(request, userId.Value);
             return Ok(result);
         }
         [HttpGet("{modId}")]
