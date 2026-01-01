@@ -26,6 +26,7 @@ namespace GaVL.Application.Auths
         Task<ApiResult<bool>> Logout(LogoutRequest request);
         Task<ApiResult<bool>> ForgotPassword(ForgotPasswordRequest request);
         Task<ApiResult<bool>> ResetPassword(ResetPasswordRequest request);
+        Task<ApiResult<bool>> ChangePassword(Guid userId, string oldPassword, string newPassword);
     }
     public class AuthService : IAuthService
     {
@@ -250,6 +251,21 @@ namespace GaVL.Application.Auths
             var localPart = parts[0];
             var visiblePart = localPart.Substring(Math.Max(0, localPart.Length - 3));
             return $"***{visiblePart}@{parts[1]}";
+        }
+
+        public async Task<ApiResult<bool>> ChangePassword(Guid userId, string oldPassword, string newPassword)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return new ApiErrorResult<bool>("User not found.");
+            bool isOldPasswordValid = BCrypt.Net.BCrypt.Verify(oldPassword, user.PasswordHash);
+            if (!isOldPasswordValid)
+            {
+                return new ApiErrorResult<bool>("Old password is incorrect.");
+            }
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync();
+            return new ApiSuccessResult<bool>(true, "Password changed successfully.");
         }
     }
 }
