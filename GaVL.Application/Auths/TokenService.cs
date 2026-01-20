@@ -36,6 +36,7 @@ namespace GaVL.Application.Auths
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("fullName", user.FullName),
                 new Claim("username", user.Username),
                 new Claim("avatar", user.AvatarUrl!),
                 new Claim("role", user.Role.Name),

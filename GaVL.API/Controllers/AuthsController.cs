@@ -40,6 +40,18 @@ namespace GaVL.API.Controllers
                 return BadRequest(result);
             }
         }
+        [HttpPost("google")]
+        public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginDto request)
+        {
+            var result = await _authService.LoginWithGoogleAsync(request);
+            if (result.Success)
+                return Ok(result);
+            else
+            {
+                _logger.LogWarning("Google login failed for token {Token}: {Message}", request.AccessToken, result.Message);
+                return BadRequest(result);
+            }
+        }
         [HttpPost("admin")]
         public async Task<IActionResult> LoginDashboard([FromBody] LoginDashboardRequest request)
         {
