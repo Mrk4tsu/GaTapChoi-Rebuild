@@ -14,6 +14,7 @@ namespace GaVL.Application.Catalog.Mods
     public interface IModService
     {
         Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request);
+        Task<ApiResult<List<ModDTO>>> GetModsPopular(int take);
         Task<ApiResult<PagedResult<ModDTO>>> GetModsByUserId(PagingRequest request, Guid userId);
         Task<ApiResult<ModDetailDTO>> GetModById(int modId);
         Task<ApiResult<SeoModDTO>> GetSeoModById(int modId);
@@ -99,6 +100,39 @@ namespace GaVL.Application.Catalog.Mods
             };
             await _redisService.SetValue(cacheKey, result, TimeSpan.FromMinutes(CacheExpiryValue));
             return new ApiSuccessResult<PagedResult<ModDTO>>(result);
+        }
+        public async Task<ApiResult<List<ModDTO>>> GetModsPopular(int take)
+        {
+            var cacheKey = $"mods:popular:{take}";
+            var cachedResult = await _redisService.GetValue<List<ModDTO>>(cacheKey);
+            if (cachedResult != null)
+            {
+                return new ApiSuccessResult<List<ModDTO>>(cachedResult);
+            }
+            var mods = await _dbContext.Mods
+            .AsNoTracking()
+            .Include(m => m.User)
+            .Include(m => m.Category)
+            .Where(m => !m.IsDeleted)
+            .OrderByDescending(x => x.ViewCount)
+            .Take(take)
+            .ToListAsync();
+            var modDtos = mods.Select(m => new ModDTO
+            {
+                Id = m.Id,
+                Name = m.Name,
+                CreatedAt = m.CreatedAt,
+                UpdatedAt = m.UpdatedAt,
+                Username = m.User.Username,
+                CategoryName = m.Category.Name,
+                CategoryId = m.Category.Id,
+                CrackType = m.CrackType,
+                SeoAlias = m.SeoAlias,
+                IsPrivate = m.IsPrivate,
+                Thumbnail = m.Thumbnail
+            }).ToList();
+            await _redisService.SetValue(cacheKey, modDtos, TimeSpan.FromDays(1));
+            return new ApiSuccessResult<List<ModDTO>>(modDtos);
         }
         public async Task<ApiResult<PagedResult<ModDTO>>> GetModsByUserId(PagingRequest request, Guid userId)
         {

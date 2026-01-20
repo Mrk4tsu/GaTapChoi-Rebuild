@@ -16,5 +16,6 @@
         public List<Post> Posts { get; set; }
         public List<Comment> Comments { get; set; }
         public List<Notify> Notifies { get; set; }
+        public List<PostRevision> PostRevisions { get; set; }
     }
 }

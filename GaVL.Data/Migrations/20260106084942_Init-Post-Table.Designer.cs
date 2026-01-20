@@ -3,6 +3,7 @@ using System;
 using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106084942_Init-Post-Table")]
+    partial class InitPostTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -262,7 +265,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 1, 10, 13, 6, 56, 562, DateTimeKind.Utc).AddTicks(5063))
+                        .HasDefaultValue(new DateTime(2026, 1, 6, 8, 49, 42, 307, DateTimeKind.Utc).AddTicks(7364))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -303,7 +306,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 1, 10, 13, 6, 56, 562, DateTimeKind.Utc).AddTicks(5454))
+                        .HasDefaultValue(new DateTime(2026, 1, 6, 8, 49, 42, 307, DateTimeKind.Utc).AddTicks(7902))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")
@@ -368,8 +371,7 @@ namespace GaVL.Data.Migrations
 
                     b.HasIndex("IsDeleted");
 
-                    b.HasIndex("SeoAlias")
-                        .IsUnique();
+                    b.HasIndex("SeoAlias");
 
                     b.ToTable("post_categories", (string)null);
                 });
@@ -486,26 +488,6 @@ namespace GaVL.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("tags", (string)null);
-                });
-
-            modelBuilder.Entity("GaVL.Data.Entities.Test", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("tests", (string)null);
                 });
 
             modelBuilder.Entity("GaVL.Data.Entities.Url", b =>

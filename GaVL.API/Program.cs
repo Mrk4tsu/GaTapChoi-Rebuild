@@ -21,8 +21,8 @@ var app = builder.Build();
 app.ConfigureSwaggerExplorer()
    .ConfigureCORS()
    .UseRouting()
-   .AddSignalRHubMiddlewares()
-   .AddIdentityAuthMiddlewares();
+   .AddIdentityAuthMiddlewares()
+   .AddSignalRHubMiddlewares();
 
 app.UseHttpsRedirection();
 

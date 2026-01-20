@@ -20,7 +20,7 @@ namespace GaVL.Application.Auths
     public interface IAuthService
     {
         Task<ApiResult<Guid>> Register(RegisterRequest request);
-        Task<ApiResult<TokenResponse>> Login(LoginRequest request);
+        Task<ApiResult<TokenResponse>> Login(LoginRequest request, string ipAddress);
         Task<ApiResult<TokenResponse>> LoginDashboard(LoginDashboardRequest request);
         Task<ApiResult<TokenResponse>> Refresh(RefreshRequest request);
         Task<ApiResult<bool>> Logout(LogoutRequest request);
@@ -96,7 +96,7 @@ namespace GaVL.Application.Auths
             };
             return new ApiSuccessResult<TokenResponse>(loginResult, "Login successful.");
         }
-        public async Task<ApiResult<TokenResponse>> Login(LoginRequest request)
+        public async Task<ApiResult<TokenResponse>> Login(LoginRequest request, string ipAddress)
         {
             var isValidCaptcha = await _turnstileService.ValidateTokenAsync(request.CaptchaToken);
             if (!isValidCaptcha) return new ApiErrorResult<TokenResponse>("CAPTCHA validation failed.");

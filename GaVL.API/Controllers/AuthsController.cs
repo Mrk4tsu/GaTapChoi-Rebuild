@@ -7,7 +7,7 @@ namespace GaVL.API.Controllers
 {
     [Route("api/auth"), AllowAnonymous]
     [ApiController]
-    public class AuthsController : ControllerBase
+    public class AuthsController : BasesController
     {
         private readonly IAuthService _authService;
         private readonly ILogger<AuthsController> _logger;
@@ -31,7 +31,7 @@ namespace GaVL.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var result = await _authService.Login(request);
+            var result = await _authService.Login(request, GetClientIpAddress());
             if (result.Success)
                 return Ok(result);
             else
@@ -99,6 +99,56 @@ namespace GaVL.API.Controllers
                 _logger.LogWarning("Reset password failed for email {Email}: {Message}", request.Email, result.Message);
                 return BadRequest(result);
             }
+        }
+        [HttpPost("change-password"), Authorize]
+        public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+            {
+                _logger.LogWarning("Change password attempted without valid user ID in claims.");
+                return Unauthorized(new { message = "Unauthorized" });
+            }
+            var result = await _authService.ChangePassword(userId.Value, oldPassword, newPassword);
+            if (result.Success)
+                return Ok(result);
+            else
+            {
+                _logger.LogWarning("Change password failed for user ID {UserId}: {Message}", userId, result.Message);
+                return BadRequest(result);
+            }
+        }
+        [HttpGet("ip")]
+        public IActionResult GetClientIp()
+        {
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            // Xử lý trường hợp có proxy/load balancer
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+            {
+                ipAddress = Request.Headers["X-Forwarded-For"].ToString().Split(',')[0].Trim();
+            }
+            else if (Request.Headers.ContainsKey("X-Real-IP"))
+            {
+                ipAddress = Request.Headers["X-Real-IP"].ToString();
+            }
+
+            return Ok(ipAddress);
+        }
+        [NonAction]
+        public string GetClientIpAddress()
+        {
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            // Xử lý trường hợp có proxy/load balancer
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+            {
+                ipAddress = Request.Headers["X-Forwarded-For"].ToString().Split(',')[0].Trim();
+            }
+            else if (Request.Headers.ContainsKey("X-Real-IP"))
+            {
+                ipAddress = Request.Headers["X-Real-IP"].ToString();
+            }
+            return ipAddress ?? string.Empty;
         }
     }
 }

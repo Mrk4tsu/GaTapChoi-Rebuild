@@ -23,6 +23,12 @@ namespace GaVL.API.Controllers
             var result = await _modService.GetMods(request);
             return Ok(result);
         }
+        [HttpGet("popular")]
+        public async Task<IActionResult> GetModsByUser(int take)
+        {
+            var result = await _modService.GetModsPopular(take);
+            return Ok(result);
+        }
         [HttpGet("mine"), Authorize]
         public async Task<IActionResult> GetModsByUser([FromQuery] PagingRequest request)
         {

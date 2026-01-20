@@ -14,6 +14,11 @@ namespace GaVL.API.Hubs
             await Clients.All.SendAsync("ReceiveMessage", user, message);
             _logger.LogInformation("Message sent to all clients: {User} - {Message}", user, message);
         }
+        public async Task MemberJoined(string user, string message)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            _logger.LogInformation("Message sent to all clients: {User} - {Message}", user, message);
+        }
         public override async Task OnConnectedAsync()
         {
             await base.OnConnectedAsync();
