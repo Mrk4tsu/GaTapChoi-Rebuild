@@ -11,6 +11,8 @@ builder.Services.ConfigureDbContext(builder.Configuration, builder.Environment)
                 .AddSmtpConfig(builder.Configuration)
                 .AddService(builder.Configuration)
                 .AddSwaggerExplorer();
+builder.Services.AddSignalR()
+                .AddAzureSignalR();
 
 builder.Services.AddControllers();
 
@@ -18,7 +20,9 @@ var app = builder.Build();
 
 app.ConfigureSwaggerExplorer()
    .ConfigureCORS()
-   .AddIdentityAuthMiddlewares();
+   .UseRouting()
+   .AddIdentityAuthMiddlewares()
+   .AddSignalRHubMiddlewares();
 
 app.UseHttpsRedirection();
 
