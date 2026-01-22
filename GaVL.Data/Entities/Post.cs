@@ -8,10 +8,14 @@
         public string MainImage {  get; set; }
         public string Title {  get; set; }
         public string Description { get; set; }
+        public string Sumary { get; set; }
         public string SeoAlias { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public bool IsDeleted { get; set; }
+        public int CategoryId { get; set; }
+        public PostCategory Category { get; set; }
         public User User { get; set; }
+        public List<PostTag> PostTags { get; set; }
     }
 }
