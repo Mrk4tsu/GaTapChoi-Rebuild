@@ -3,6 +3,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using GaVL.DTO.Settings;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Options;
 
 namespace GaVL.Application.Systems
@@ -13,6 +14,7 @@ namespace GaVL.Application.Systems
         Task<string> UploadFileGetUrl(IFormFile file, string key);
         Task DeleteFileAsync(string key, string keyPref);
         Task DeleteFilesAsync(List<string> keys);
+        Task DeleteOldImage(string urlImage);
     }
     public class R2Service : IR2Service
     {
@@ -28,6 +30,17 @@ namespace GaVL.Application.Systems
                 ForcePathStyle = true
             };
             _s3Client = new AmazonS3Client(credentials, config);
+        }
+        public async Task DeleteOldImage(string urlImage)
+        {
+            var oldKey = urlImage.Replace($"{_options.PublicEndpoint}/", "");
+            var request = new DeleteObjectRequest
+            {
+                BucketName = _options.BucketName,
+                Key = oldKey
+            };
+
+            await _s3Client.DeleteObjectAsync(request);
         }
 
         public async Task DeleteFileAsync(string key, string keyPrex)

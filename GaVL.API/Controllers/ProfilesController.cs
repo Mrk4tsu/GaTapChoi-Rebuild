@@ -1,7 +1,6 @@
 ﻿using GaVL.Application.Profiles;
 using GaVL.DTO.Profiles;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GaVL.API.Controllers
@@ -15,6 +14,12 @@ namespace GaVL.API.Controllers
         {
             _profileService = profileService;
         }
+        [HttpGet]
+        public async Task<IActionResult> GetProfile(string username)
+        {
+            var result = await _profileService.GetUserByUsername(username);
+            return Ok(result);
+        }
         [HttpPost("avatar"), Authorize]
         public async Task<IActionResult> UploadAvatar([FromForm] AvatarRequest request)
         {
@@ -23,8 +28,20 @@ namespace GaVL.API.Controllers
             {
                 return Unauthorized();
             }
-            var result = await _profileService.UploadAvatarAsync(userId.Value, request);
+            var result = await _profileService.UploadAvatar(userId.Value, request);
             return Ok(result);
         }
+        [HttpPut("fullname"), Authorize]
+        public async Task<IActionResult> UpdateFullname(string newName)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var result = await _profileService.UpdateFullname(userId.Value, newName);
+            return Ok(result);
+        }
+        
     }
 }
