@@ -8,6 +8,7 @@
         public DateTime UpdatedAt { get; set; }
         public string Thumbnail { get; set; }
         public string Username { get; set; }
+        public string AuthorName { get; set; }
         public string CategoryName { get; set; }
         public byte CategoryId { get; set; }
         public byte CrackType { get; set; }

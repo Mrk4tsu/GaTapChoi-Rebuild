@@ -80,10 +80,10 @@ namespace GaVL.Application.Profiles
 
             user.FullName = newName;
             await _db.SaveChangesAsync();
-
+            _ = removeCache();
             var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             await _redis.SetValue(rateLimitKey, currentTimestamp, TimeSpan.FromDays(3));
-            await removeCache();
+            
             return new ApiSuccessResult<string>(newName);
         }
 
@@ -115,7 +115,7 @@ namespace GaVL.Application.Profiles
 
             user.AvatarUrl = avatarUrl;
             await _db.SaveChangesAsync();
-            await removeCache();
+            _ = removeCache();
             return new ApiSuccessResult<string>(avatarUrl);
         }
         private async Task removeCache()

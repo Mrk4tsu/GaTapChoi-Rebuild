@@ -49,5 +49,23 @@ namespace GaVL.Utilities
                 return text;
             return text.Substring(0, maxLength) + "...";
         }
+        public static string ExtractUsernameFromEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return string.Empty;
+
+            var parts = email.Split('@');
+            if (parts.Length == 0)
+                return string.Empty;
+
+            var localPart = parts[0];
+            return RemoveSpecialCharacters(localPart);
+        }
+        public static string RemoveSpecialCharacters(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
+            return Regex.Replace(input, @"[^a-zA-Z0-9]", "");
+        }
     }
 }
