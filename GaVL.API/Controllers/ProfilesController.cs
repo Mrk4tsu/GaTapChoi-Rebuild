@@ -26,7 +26,7 @@ namespace GaVL.API.Controllers
             var userId = GetUserIdFromClaims();
             if (userId == null)
             {
-                return Unauthorized();
+                return Unauthorized("Mạnh gay");
             }
             var result = await _profileService.UploadAvatar(userId.Value, request);
             return Ok(result);
@@ -42,6 +42,15 @@ namespace GaVL.API.Controllers
             var result = await _profileService.UpdateFullname(userId.Value, newName);
             return Ok(result);
         }
-        
+        [HttpGet("test"), Authorize]
+        public async Task<IActionResult> TestEndpoint()
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            return Ok(new { message = "Test endpoint is working!", userId = userId.Value });
+        }
     }
 }

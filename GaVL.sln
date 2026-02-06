@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36310.24 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaVL.API", "GaVL.API\GaVL.API.csproj", "{BD2242CE-7FA7-441D-B166-908C753021BE}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaVL.DTO", "GaVL.DTO\GaVL.DTO.csproj", "{AACAC3D8-E712-4C4A-A33E-FE9BE8E55737}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaVL.Utilities", "GaVL.Utilities\GaVL.Utilities.csproj", "{7771AD38-9549-4A28-B054-D0542F3CA9FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaVL.BackgroundJobs", "GaVL.BackgroundJobs\GaVL.BackgroundJobs.csproj", "{40C064D4-4632-46BC-AE1A-B79C1ED2C4F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{7771AD38-9549-4A28-B054-D0542F3CA9FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7771AD38-9549-4A28-B054-D0542F3CA9FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7771AD38-9549-4A28-B054-D0542F3CA9FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40C064D4-4632-46BC-AE1A-B79C1ED2C4F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40C064D4-4632-46BC-AE1A-B79C1ED2C4F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40C064D4-4632-46BC-AE1A-B79C1ED2C4F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40C064D4-4632-46BC-AE1A-B79C1ED2C4F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

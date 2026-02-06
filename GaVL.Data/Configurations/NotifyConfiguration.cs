@@ -30,6 +30,7 @@ namespace GaVL.Data.Configurations
             builder.Property(n => n.IsDeleted)
                         .HasColumnName("is_deleted")
                         .HasDefaultValue(false);
+            builder.Property(x => x.Url).HasColumnName("url");
             builder.HasOne(n => n.User)
                      .WithMany(u => u.Notifies)
                      .HasForeignKey(n => n.UserId)

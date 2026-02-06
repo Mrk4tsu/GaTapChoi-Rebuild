@@ -128,7 +128,8 @@ namespace GaVL.API.Extensions
                 "https://forum.gavl.io.vn",
                 "http://127.0.0.1:5500",
                 "http://127.0.0.1:8787",
-                "https://mrkatsu.io.vn"
+                "https://mrkatsu.io.vn",
+                "https://gavl-function-g8d0htbwhfh3bcaq.southeastasia-01.azurewebsites.net"
             };
 
             app.UseCors(options =>

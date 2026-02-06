@@ -1,10 +1,12 @@
-﻿using GaVL.Application.Systems;
+﻿using Amazon.Runtime.Internal;
+using GaVL.Application.Systems;
 using GaVL.Data;
 using GaVL.Data.Entities;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Paging;
 using GaVL.DTO.Posts;
 using GaVL.Utilities;
+using Mailjet.Client.Resources;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -18,6 +20,7 @@ namespace GaVL.Application.Catalog.Posts
         Task<ApiResult<PagedResult<PostDTO>>> GetPosts(PagingRequest request);
         Task<ApiResult<PostDetailDTO>> GetPostById(int id);
         Task<ApiResult<SeoPostDTO>> GetSeoPostById(int postId);
+        Task<ApiResult<PagedResult<PostDTO>>> GetPostByUsername(string username, PagingRequest request);
     }
     public class PostService : IPostService
     {
@@ -58,7 +61,9 @@ namespace GaVL.Application.Catalog.Posts
             {
                 Id = post.Id,
                 AuthorId = post.UserId,
-                AuthorName = post.User.Username,
+                AuthorName = post.User.FullName,
+                Username = post.User.Username,
+                Avatar = post.User.AvatarUrl,
                 SeoAlias = post.SeoAlias,
                 Thumbnail = post.MainImage,
                 Title = post.Title,
@@ -68,7 +73,7 @@ namespace GaVL.Application.Catalog.Posts
                 UpdatedAt = post.UpdateAt,
                 CategoryId = post.CategoryId,
                 CategoryName = post.Category?.Name,
-                Tags = post.PostTags.Select(pt => pt.Tag.Name).ToList()
+                Tags = new()
             };
             await SaveCache(cacheKey, postDTO);
             return new ApiSuccessResult<PostDetailDTO>(postDTO);
@@ -99,10 +104,44 @@ namespace GaVL.Application.Catalog.Posts
             return new ApiSuccessResult<SeoPostDTO>(seoPostDTO);
         }
         public async Task<ApiResult<PagedResult<PostDTO>>> GetPosts(PagingRequest request)
-        {
+        {            
             var query = _db.Posts.AsNoTracking().Include(x => x.User).Where(x => x.IsDeleted == false)
                 .AsQueryable();
 
+            var totalRecord = await query.CountAsync();
+            var posts = query.OrderByDescending(x => x.CreateAt)
+                .Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize);
+            var postsDTO = await posts.Select(x => new PostDTO
+            {
+                Id = x.Id,
+                AuthorId = x.UserId,
+                AuthorName = x.User.FullName,
+                Username = x.User.Username,
+                SeoAlias = x.SeoAlias,
+                Thumbnail = x.MainImage,
+                Title = x.Title,
+                Sumary = x.Sumary,
+                CreatedAt = x.CreateAt,
+                UpdatedAt = x.UpdateAt
+            }).ToListAsync();
+
+            var result = new PagedResult<PostDTO>
+            {
+                Items = postsDTO,
+                TotalRecords = totalRecord,
+                PageIndex = request.PageIndex,
+                PageSize = request.PageSize
+            };
+            return new ApiSuccessResult<PagedResult<PostDTO>>(result);
+        }
+        public async Task<ApiResult<PagedResult<PostDTO>>> GetPostByUsername(string username, PagingRequest request)
+        {
+            var key = $"{KeyPrefix}:{username}:page:{request.PageIndex}-size:{request.PageSize}";
+            var query = _db.Posts.AsNoTracking()
+                .Include(x => x.User)
+                .Where(x => x.User.Username == username && !x.IsDeleted)
+                .AsQueryable();
             var totalRecord = await query.CountAsync();
             var posts = query.OrderByDescending(x => x.CreateAt)
                 .Skip((request.PageIndex - 1) * request.PageSize)
@@ -119,13 +158,12 @@ namespace GaVL.Application.Catalog.Posts
                 CreatedAt = x.CreateAt,
                 UpdatedAt = x.UpdateAt
             }).ToListAsync();
-
             var result = new PagedResult<PostDTO>
             {
                 Items = postsDTO,
                 TotalRecords = totalRecord,
-                PageIndex = request.PageIndex,
-                PageSize = request.PageSize
+                PageIndex = 1,
+                PageSize = totalRecord
             };
             return new ApiSuccessResult<PagedResult<PostDTO>>(result);
         }
@@ -344,6 +382,5 @@ namespace GaVL.Application.Catalog.Posts
             var cacheKey = $"{KeyPrefix}:{postId}";
             await _redisService.RemoveKeyAsync(cacheKey);
         }
-
     }
 }

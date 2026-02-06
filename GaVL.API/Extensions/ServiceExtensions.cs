@@ -31,6 +31,7 @@ namespace GaVL.API.Extensions
             services.AddScoped<IR2Service, R2Service>();
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IBotNews, BotNews>();
 
             services.AddSingleton<MarkdownPipeline>(sp => new MarkdownPipelineBuilder().Build());
             return services;

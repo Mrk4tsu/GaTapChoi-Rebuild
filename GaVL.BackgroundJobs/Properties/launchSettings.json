@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "GaVL.BackgroundJobs": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7234",
+      "launchBrowser": false
+    }
+  }
+}

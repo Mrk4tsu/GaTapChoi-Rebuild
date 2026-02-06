@@ -12,8 +12,10 @@ namespace GaVL.API.Controllers
     public class PostsController : BasesController
     {
         private readonly IPostService _postService;
-        public PostsController(IPostService postService)
+        private readonly IBotNews _botNews;
+        public PostsController(IPostService postService, IBotNews botNews)
         {
+            _botNews = botNews;
             _postService = postService;
         }
         [HttpGet]
@@ -26,6 +28,12 @@ namespace GaVL.API.Controllers
         public async Task<IActionResult> GetPostById(int id)
         {
             var result = await _postService.GetPostById(id);
+            return Ok(result);
+        }
+        [HttpGet("user/{username}")]
+        public async Task<IActionResult> GetPostByUsername(string username, [FromQuery] PagingRequest request)
+        {
+            var result = await _postService.GetPostByUsername(username, request);
             return Ok(result);
         }
         [HttpGet("seo")]
@@ -42,6 +50,12 @@ namespace GaVL.API.Controllers
             if (userId == null) return Unauthorized();
             var result = await _postService.CreatePostAdvanced(request, userId.Value, ct);
 
+            return Ok(result);
+        }
+        [HttpPost("bot")]
+        public async Task<IActionResult> RunBotNews(CancellationToken ct)
+        {
+            var result = await _botNews.Run();
             return Ok(result);
         }
         //[HttpPost, Authorize]

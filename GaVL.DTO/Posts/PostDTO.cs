@@ -5,6 +5,8 @@
         public int Id { get; set; }
         public string Title { get; set; }
         public string AuthorName {  get; set; }
+        public string Username { get; set; }
+        public string Avatar { get; set; }
         public Guid AuthorId { get; set; }
         public string SeoAlias {  get; set; }
         public string Thumbnail {  get; set; }

@@ -23,5 +23,6 @@ namespace GaVL.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<PostCategory> PostCategories { get; set; }
         public DbSet<PostRevision> PostRevisions { get; set; }
+        public DbSet<Notify> Notifies { get; set; }
     }
 }

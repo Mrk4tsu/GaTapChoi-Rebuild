@@ -34,5 +34,6 @@ namespace GaVL.API.Controllers
             await _r2Service.DeleteFileAsync(fileName, "test");
             return Ok();
         }
+        
     }
 }
