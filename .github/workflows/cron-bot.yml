@@ -5,7 +5,7 @@ on:
   schedule:
     # Chạy mỗi 4 tiếng một lần (vào phút thứ 0)
     # Các mốc giờ chạy (giờ VN): 7h sáng, 11h trưa, 3h chiều, 7h tối, 11h đêm...
-    - cron: '0 */4 * * *'
+    - cron: '0 */1 * * *'
 
   # 2. Cho phép bấm nút "Run workflow" thủ công để test ngay
   workflow_dispatch:
