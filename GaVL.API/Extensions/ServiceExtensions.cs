@@ -18,6 +18,7 @@ namespace GaVL.API.Extensions
             services.Configure<AppUrlSetting>(config.GetSection(SystemConstant.APP_URL_SETTING));
             services.Configure<ModderSetting>(config.GetSection(SystemConstant.MODDER_SETTING));
             services.Configure<R2Options>(config.GetSection(SystemConstant.R2_OPTION));
+            services.Configure<BotSettings>(config.GetSection(SystemConstant.BOT_SETTING));
             services.AddHttpClient();
             return services;
         } 

@@ -53,9 +53,9 @@ namespace GaVL.API.Controllers
             return Ok(result);
         }
         [HttpPost("bot")]
-        public async Task<IActionResult> RunBotNews(CancellationToken ct)
+        public async Task<IActionResult> RunBotNews([FromQuery] string key)
         {
-            var result = await _botNews.Run();
+            var result = await _botNews.Run(key);
             return Ok(result);
         }
         //[HttpPost, Authorize]

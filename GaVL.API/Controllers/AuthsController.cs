@@ -1,7 +1,9 @@
 ﻿using GaVL.Application.Auths;
 using GaVL.DTO.Auths;
+using GaVL.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GaVL.API.Controllers
 {
@@ -29,6 +31,7 @@ namespace GaVL.API.Controllers
             }
         }
         [HttpPost("login")]
+        [EnableRateLimiting(SystemConstant.POLICY_LOGIN_IP)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authService.Login(request, GetClientIpAddress());
@@ -145,6 +148,12 @@ namespace GaVL.API.Controllers
                 ipAddress = Request.Headers["X-Real-IP"].ToString();
             }
 
+            // Loại bỏ port nếu có
+            if (!string.IsNullOrEmpty(ipAddress) && ipAddress.Contains(':'))
+            {
+                ipAddress = ipAddress.Split(':')[0];
+            }
+
             return Ok(ipAddress);
         }
         [NonAction]
@@ -160,6 +169,13 @@ namespace GaVL.API.Controllers
             {
                 ipAddress = Request.Headers["X-Real-IP"].ToString();
             }
+            
+            // Loại bỏ port nếu có
+            if (!string.IsNullOrEmpty(ipAddress) && ipAddress.Contains(':'))
+            {
+                ipAddress = ipAddress.Split(':')[0];
+            }
+            
             return ipAddress ?? string.Empty;
         }
 

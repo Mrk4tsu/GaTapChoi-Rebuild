@@ -6,6 +6,7 @@ builder.Services.ConfigureDbContext(builder.Configuration, builder.Environment)
                 .ConfigureRedis(builder.Configuration)
                 .AddAuthorization()
                 .AddHttpContextAccessor()
+                .ConfigureRateLimited()
                 .AddDIService()
                 .ConfigureJwt(builder.Configuration)
                 .AddSmtpConfig(builder.Configuration)
@@ -21,6 +22,7 @@ var app = builder.Build();
 app.ConfigureSwaggerExplorer()
    .ConfigureCORS()
    .UseRouting()
+   .UseRateLimiter()
    .AddIdentityAuthMiddlewares()
    .AddSignalRHubMiddlewares();
 

@@ -15,12 +15,12 @@ public class BotNewsJobs
         _httpClient = httpClient;
     }
 
-    [Function("Function1")]
-    public async Task Run([TimerTrigger("0 0 */2 * * *")] TimerInfo myTimer)
+    [Function("Bot")]
+    public async Task Run([TimerTrigger("0 0 */1 * * *")] TimerInfo myTimer)
     {
-        _logger.LogInformation("Bắt đầu chạy Job");
+        _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+        //string url = "http://localhost:5000/api/post/bot";
         string url = "https://api-gavl-ewhshvbfhwdccras.southeastasia-01.azurewebsites.net/api/post/bot";
-
         try
         {
             // Gọi method POST (hoặc GET tùy API của bạn)
