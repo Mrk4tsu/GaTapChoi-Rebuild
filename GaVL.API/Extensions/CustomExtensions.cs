@@ -1,4 +1,5 @@
-﻿using GaVL.Application.Auths;
+﻿using GaVL.API.Hubs;
+using GaVL.Application.Auths;
 using GaVL.Application.Systems;
 using GaVL.Data;
 using GaVL.DTO.Settings;
@@ -125,7 +126,9 @@ namespace GaVL.API.Extensions
                 "https://admin.gavl.io.vn",
                 "https://gavl.io.vn",
                 "https://forum.gavl.io.vn",
+                "http://127.0.0.1:5500",
                 "http://127.0.0.1:8787",
+                "https://mrkatsu.io.vn"
             };
 
             app.UseCors(options =>
@@ -183,6 +186,14 @@ namespace GaVL.API.Extensions
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
+            return app;
+        }
+        public static IApplicationBuilder AddSignalRHubMiddlewares(this IApplicationBuilder app)
+        {
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHub<NotifyHub>("notify");
+            });
             return app;
         }
     }

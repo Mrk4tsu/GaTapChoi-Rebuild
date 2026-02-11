@@ -1,6 +1,7 @@
 ﻿using GaVL.Application.Auths;
 using GaVL.Application.Catalog.Mods;
 using GaVL.Application.Catalog.Posts;
+using GaVL.Application.Profiles;
 using GaVL.Application.Systems;
 using GaVL.DTO.Settings;
 using GaVL.Utilities;
@@ -29,6 +30,7 @@ namespace GaVL.API.Extensions
             services.AddScoped<IModService, ModService>();
             services.AddScoped<IR2Service, R2Service>();
             services.AddScoped<IPostService, PostService>();
+            services.AddScoped<IProfileService, ProfileService>();
 
             services.AddSingleton<MarkdownPipeline>(sp => new MarkdownPipelineBuilder().Build());
             return services;

@@ -34,6 +34,15 @@ namespace GaVL.Utilities
             }
             return result.ToString();
         }
+        public static string NormalizeTagName(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            var str = input.Trim().ToLowerInvariant();
+            str = Regex.Replace(str, @"\s+", " ");
+            return str;
+        }
         private string TruncateString(string text, int maxLength)
         {
             if (string.IsNullOrEmpty(text) || text.Length <= maxLength)

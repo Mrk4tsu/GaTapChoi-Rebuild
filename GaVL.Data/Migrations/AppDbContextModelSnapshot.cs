@@ -53,6 +53,58 @@ namespace GaVL.Data.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
+            modelBuilder.Entity("GaVL.Data.Entities.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CommentParentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("parent_id");
+
+                    b.Property<int?>("RootId")
+                        .HasColumnType("integer")
+                        .HasColumnName("root_id");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentParentId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("RootId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("comments", (string)null);
+                });
+
             modelBuilder.Entity("GaVL.Data.Entities.Mod", b =>
                 {
                     b.Property<int>("Id")
@@ -139,6 +191,55 @@ namespace GaVL.Data.Migrations
                     b.ToTable("mods", (string)null);
                 });
 
+            modelBuilder.Entity("GaVL.Data.Entities.Notify", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_updated_at");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Notifies_IsDeleted");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Notifies_UserId");
+
+                    b.ToTable("notifies", (string)null);
+                });
+
             modelBuilder.Entity("GaVL.Data.Entities.Post", b =>
                 {
                     b.Property<int>("Id")
@@ -147,6 +248,10 @@ namespace GaVL.Data.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -157,7 +262,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 12, 29, 6, 1, 25, 165, DateTimeKind.Utc).AddTicks(7964))
+                        .HasDefaultValue(new DateTime(2026, 1, 20, 5, 10, 2, 822, DateTimeKind.Utc).AddTicks(9601))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -183,6 +288,12 @@ namespace GaVL.Data.Migrations
                         .HasColumnType("character varying(250)")
                         .HasColumnName("seo_alias");
 
+                    b.Property<string>("Sumary")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("sumary");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -192,7 +303,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2025, 12, 29, 6, 1, 25, 165, DateTimeKind.Utc).AddTicks(8240))
+                        .HasDefaultValue(new DateTime(2026, 1, 20, 5, 10, 2, 822, DateTimeKind.Utc).AddTicks(9888))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")
@@ -201,6 +312,8 @@ namespace GaVL.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("Code");
 
                     b.HasIndex("IsDeleted");
@@ -208,6 +321,113 @@ namespace GaVL.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("posts", (string)null);
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.PostCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("create_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("SeoAlias")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("seo_alias");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("update_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("SeoAlias")
+                        .IsUnique();
+
+                    b.ToTable("post_categories", (string)null);
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.PostRevision", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentSnapshot")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_snapshot");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("integer")
+                        .HasColumnName("post_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("post_revisions", (string)null);
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.PostTag", b =>
+                {
+                    b.Property<int>("PostId")
+                        .HasColumnType("integer")
+                        .HasColumnName("post_id");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer")
+                        .HasColumnName("tag_id");
+
+                    b.HasKey("PostId", "TagId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("post_tags", (string)null);
                 });
 
             modelBuilder.Entity("GaVL.Data.Entities.Role", b =>
@@ -237,6 +457,55 @@ namespace GaVL.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("roles", (string)null);
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("SeoAlias")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("seo_alias");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeoAlias")
+                        .IsUnique();
+
+                    b.ToTable("tags", (string)null);
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.Test", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("tests", (string)null);
                 });
 
             modelBuilder.Entity("GaVL.Data.Entities.Url", b =>
@@ -286,6 +555,11 @@ namespace GaVL.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<int>("AuthProvider")
+                        .HasMaxLength(50)
+                        .HasColumnType("integer")
+                        .HasColumnName("auth_provider");
+
                     b.Property<string>("AvatarUrl")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -301,6 +575,17 @@ namespace GaVL.Data.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("email");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("full_name");
+
+                    b.Property<string>("GoogleSubjectId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("google_subject_id");
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -312,7 +597,6 @@ namespace GaVL.Data.Migrations
                         .HasColumnName("last_login_at");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("password_hash");
@@ -344,6 +628,30 @@ namespace GaVL.Data.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("GaVL.Data.Entities.Comment", b =>
+                {
+                    b.HasOne("GaVL.Data.Entities.Comment", "CommentParent")
+                        .WithMany("Children")
+                        .HasForeignKey("CommentParentId");
+
+                    b.HasOne("GaVL.Data.Entities.Comment", "CommentRoot")
+                        .WithMany()
+                        .HasForeignKey("RootId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GaVL.Data.Entities.User", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CommentParent");
+
+                    b.Navigation("CommentRoot");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("GaVL.Data.Entities.Mod", b =>
                 {
                     b.HasOne("GaVL.Data.Entities.Category", "Category")
@@ -363,15 +671,64 @@ namespace GaVL.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("GaVL.Data.Entities.Notify", b =>
+                {
+                    b.HasOne("GaVL.Data.Entities.User", "User")
+                        .WithMany("Notifies")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("GaVL.Data.Entities.Post", b =>
                 {
+                    b.HasOne("GaVL.Data.Entities.PostCategory", "Category")
+                        .WithMany("Posts")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GaVL.Data.Entities.User", "User")
                         .WithMany("Posts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Category");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.PostRevision", b =>
+                {
+                    b.HasOne("GaVL.Data.Entities.User", "User")
+                        .WithMany("PostRevisions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.PostTag", b =>
+                {
+                    b.HasOne("GaVL.Data.Entities.Post", "Post")
+                        .WithMany("PostTags")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GaVL.Data.Entities.Tag", "Tag")
+                        .WithMany("PostTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("GaVL.Data.Entities.Url", b =>
@@ -401,9 +758,24 @@ namespace GaVL.Data.Migrations
                     b.Navigation("Mods");
                 });
 
+            modelBuilder.Entity("GaVL.Data.Entities.Comment", b =>
+                {
+                    b.Navigation("Children");
+                });
+
             modelBuilder.Entity("GaVL.Data.Entities.Mod", b =>
                 {
                     b.Navigation("Urls");
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.Post", b =>
+                {
+                    b.Navigation("PostTags");
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.PostCategory", b =>
+                {
+                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("GaVL.Data.Entities.Role", b =>
@@ -411,9 +783,20 @@ namespace GaVL.Data.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("GaVL.Data.Entities.Tag", b =>
+                {
+                    b.Navigation("PostTags");
+                });
+
             modelBuilder.Entity("GaVL.Data.Entities.User", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("Mods");
+
+                    b.Navigation("Notifies");
+
+                    b.Navigation("PostRevisions");
 
                     b.Navigation("Posts");
                 });
