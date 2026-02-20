@@ -50,7 +50,7 @@ namespace GaVL.Application.Catalog.Mods
                     prefix = "[TLC] ";
                     break;
                 case 3:
-                    prefix = "[TuanXinh] - ";
+                    prefix = "[TuanXinh] ";
                     break;
                 case 4:
                     prefix = "[CVQ] ";

@@ -3,6 +3,7 @@ using GaVL.Data;
 using GaVL.Data.Entities;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Mods;
+using GaVL.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace GaVL.Application.Catalog.Mods
@@ -41,7 +42,7 @@ namespace GaVL.Application.Catalog.Mods
             }
             _ = Task.Run(async () =>
             {
-                await removeCache();
+                await removeCache(modId);
             });
             return new ApiSuccessResult<int>(modId);
         }
@@ -55,6 +56,9 @@ namespace GaVL.Application.Catalog.Mods
             mod.Name = request.Name;
             mod.Description = request.Description;
             mod.IsPrivate = request.IsPrivate;
+            mod.UpdatedAt = _now;
+            mod.CategoryId = request.CategoryId;
+            mod.SeoAlias = StringHelper.GenerateSeoAlias(request.Name);
             mod.UpdatedAt = _now;
 
             _db.Mods.Update(mod);
@@ -115,10 +119,13 @@ namespace GaVL.Application.Catalog.Mods
         private async Task removeCache(int? modId = null)
         {
             var cacheKey = $"mod:detail:{modId}";
+            var cacheSeoKey = $"seoMod:{modId}";
             await _redis.DeleteKeysByPatternAsync("mods:*"); 
             if (modId.HasValue)
             {
                 await _redis.DeleteKeysByPatternAsync(cacheKey);
+                await _redis.RemoveKeyAsync(cacheKey);
+                await _redis.RemoveKeyAsync(cacheSeoKey);
             }
         }
     }

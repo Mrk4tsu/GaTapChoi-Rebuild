@@ -17,6 +17,7 @@
     public class ModDetailDTO : ModDTO
     {
         public Guid AuthorId { get; set; }
+        public string AuthorAvatar { get; set; }
         public string Description { get; set; }
         public int ViewCount { get; set; }
         public List<UrlModDTO> Urls { get; set; }
