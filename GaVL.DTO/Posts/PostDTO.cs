@@ -27,5 +27,6 @@
         public string Name { get; set; }
         public string SeoAlias { get; set; }
         public string Thumbnail { get; set; }
+        public string Sumary { get; set; }
     }
 }

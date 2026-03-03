@@ -13,10 +13,12 @@ namespace GaVL.API.Controllers
     {
         private readonly IPostService _postService;
         private readonly IBotNews _botNews;
-        public PostsController(IPostService postService, IBotNews botNews)
+        private readonly IBotAnimeNews _botAnimeNews;
+        public PostsController(IPostService postService, IBotNews botNews, IBotAnimeNews botAnimeNews)
         {
             _botNews = botNews;
             _postService = postService;
+            _botAnimeNews = botAnimeNews;
         }
         [HttpGet]
         public async Task<IActionResult> GetPosts([FromQuery] PagingRequest request)
@@ -56,6 +58,12 @@ namespace GaVL.API.Controllers
         public async Task<IActionResult> RunBotNews([FromQuery] string key)
         {
             var result = await _botNews.Run(key);
+            return Ok(result);
+        }
+        [HttpPost("anime")]
+        public async Task<IActionResult> RunBotAnimeNews([FromQuery] string key)
+        {
+            var result = await _botAnimeNews.Run(key); 
             return Ok(result);
         }
         //[HttpPost, Authorize]

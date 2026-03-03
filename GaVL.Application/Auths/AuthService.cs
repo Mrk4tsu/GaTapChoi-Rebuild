@@ -311,7 +311,7 @@ namespace GaVL.Application.Auths
                 AvatarUrl = googleUser.Picture,
                 AuthProvider = ProviderType.Google,
                 GoogleSubjectId = googleUser.Sub,
-                Username = googleUser.Email,
+                Username = StringHelper.ExtractUsernameFromEmail(googleUser.Email),
                 CreatedAt = DateTime.UtcNow,
                 RoleId = 4,
                 IsActive = true,

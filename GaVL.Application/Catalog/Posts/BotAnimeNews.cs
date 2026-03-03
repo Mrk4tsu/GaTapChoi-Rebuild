@@ -1,15 +1,9 @@
-﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
-using GaVL.Application.Systems;
+﻿using GaVL.Application.Systems;
 using GaVL.Data;
 using GaVL.Data.Entities;
 using GaVL.DTO.Settings;
 using GaVL.Utilities;
-using HtmlAgilityPack;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using PuppeteerSharp;
-using System;
-using System.Net;
 using System.Net.Http.Json;
 using System.ServiceModel.Syndication;
 using System.Text;
@@ -19,11 +13,11 @@ using System.Xml;
 
 namespace GaVL.Application.Catalog.Posts
 {
-    public interface IBotNews
+    public interface IBotAnimeNews
     {
         Task<string> Run(string pass);
     }
-    public class BotNews : IBotNews
+    public class BotAnimeNews : IBotAnimeNews
     {
         private readonly AppDbContext _db;
         private readonly IRedisService _redis;
@@ -31,7 +25,7 @@ namespace GaVL.Application.Catalog.Posts
         private readonly string KeyPrefix = "posts";
         private readonly BotSettings _bot;
 
-        public BotNews(AppDbContext db, IRedisService redis, IOptions<BotSettings> bot, IR2Service r2Service)
+        public BotAnimeNews(AppDbContext db, IRedisService redis, IOptions<BotSettings> bot, IR2Service r2Service)
         {
             _db = db;
             _redis = redis;
@@ -40,16 +34,24 @@ namespace GaVL.Application.Catalog.Posts
             GeminiEndpoint = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key={ApiKey}";
             _r2Service = r2Service;
         }
+
         private readonly string ApiKey;
         private readonly string GeminiEndpoint;
+
+        // 1. Thay đổi Nguồn RSS sang các trang Anime
         private readonly List<string> RssSources = new()
         {
-            "https://feeds.ign.com/ign/news",         // IGN News
-            "https://www.gamespot.com/feeds/news/",   // GameSpot News
-            "https://www.rockpapershotgun.com/feed",  // PC Games
+            "https://www.animenewsnetwork.com/news/rss.xml", // Anime News Network (Nguồn uy tín nhất)
+            "https://cr-news-api-service.prd.crunchyrollsvc.com/v1/en-US/rss", // Crunchyroll News
+            "https://myanimelist.net/rss/news.xml" // MyAnimeList News
         };
-        private readonly Guid BotUserId = Guid.Parse("019bdb9d-07b5-71a4-a310-acc7670b4ea6");
-        private readonly int DefaultCategoryId = 1;
+
+        // 2. Cập nhật ID Bot Anime của bạn
+        private readonly Guid BotUserId = Guid.Parse("019cb1c8-301c-73f4-aa8c-223633236520");
+
+        // 3. Đổi CategoryId (Giả sử 1 là Game, 2 là Anime. Nhớ đổi lại theo thực tế DB của bạn)
+        private readonly int DefaultCategoryId = 2;
+
         public async Task<string> Run(string password)
         {
             if (string.IsNullOrEmpty(_bot.Password))
@@ -60,21 +62,24 @@ namespace GaVL.Application.Catalog.Posts
             {
                 return "Sai mật khẩu bot";
             }
+
             Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine("--- BOT RANDOM GAME NEWS ---");
-            Console.WriteLine("[1] Đang trích xuất tin tức ngẫu nhiên từ RSS...");
+            Console.WriteLine("--- BOT RANDOM ANIME NEWS ---");
+            Console.WriteLine("[1] Đang trích xuất tin tức Anime ngẫu nhiên từ RSS...");
+
             var randomNews = await GetRandomNewsFromRss();
             if (randomNews == null)
             {
-                Console.WriteLine("Lỗi: Không tìm thấy tin nào trong 48h qua.");
-                return "Chưa có tin tức mới hôm nay.";
+                Console.WriteLine("Lỗi: Không tìm thấy tin nào trong 72h qua.");
+                return "Chưa có tin tức anime mới hôm nay.";
             }
+
             string ogImage = randomNews.Image;
             if (string.IsNullOrEmpty(ogImage))
             {
-                // Nếu RSS không có mới phải đi cào từ web
                 ogImage = await GetOgImage(randomNews.Link);
             }
+
             Console.WriteLine($"-> Đã chọn tin: {randomNews.Title}");
             Console.WriteLine($"-> Link gốc: {randomNews.Link}");
             Console.WriteLine("\n[2] Đang gửi cho AI viết bài...");
@@ -96,47 +101,44 @@ namespace GaVL.Application.Catalog.Posts
                 }
             }
 
+            // 4. Thay đổi Prompt để AI nhập vai Biên tập viên Anime/Wibu
             string prompt = $@"
-                    Bạn là biên tập viên SEO cho trang web game vui tính, lầy lội dành cho Gen Z Việt Nam.
+                    Bạn là biên tập viên SEO cho một trang web thông tin Anime/Manga cực kỳ vui tính, lầy lội dành cho Gen Z và cộng đồng Wibu/Otaku Việt Nam.
                     Nhiệm vụ: Dựa vào thông tin tiếng Anh dưới đây, hãy viết một bài đăng Blog (Caption) tiếng Việt.
                     Yêu cầu bài viết:
-                    - Tiêu đề giật tít một chút (nhưng không fake news).
-                    - Nội dung tóm tắt ngắn gọn sự kiện chính.
-                    - Giọng văn: Hài hước, dùng slang game thủ (farm, gank, sấy, toang...), chèn nhiều emoji hợp lý.
-                    - Tuyệt đối không dịch word-by-word (kiểu Google Dịch), hãy viết lại theo ý hiểu (Paraphrase).
-                    - Lưu ý loại bỏ các icon, emote không cần thiết
+                    - Tiêu đề giật tít hấp dẫn, gây tò mò (nhưng không fake news).
+                    - Nội dung tóm tắt ngắn gọn sự kiện chính (Anime mới ra mắt, spoiler nhẹ, drama tác giả...).
+                    - Giọng văn: Hài hước, lầy lội. Sử dụng các từ lóng của cộng đồng anime/manga (waifu, husbando, isekai, wibu, ảo ma, suy, buff bẩn, plot twist, quay xe...). Chèn nhiều emoji hợp lý.
+                    - Tuyệt đối không dịch word-by-word (kiểu Google Dịch), hãy viết lại theo ý hiểu (Paraphrase) cho thật tự nhiên.
+                    - Lưu ý loại bỏ các icon, emote không cần thiết.
                     Tin tức gốc:
                     Title: {randomNews.Title}
                     Summary: {randomNews.Summary} 
                     Yêu cầu OUTPUT: Chỉ trả về duy nhất 1 chuỗi JSON (không markdown, không code block) theo định dạng sau:
                     {{
-                        ""Title"": ""Tiêu đề tiếng Việt hấp dẫn, chứa từ khóa"",
+                        ""Title"": ""Tiêu đề tiếng Việt hấp dẫn, chứa từ khóa anime"",
                         ""SeoAlias"": ""duong-dan-tinh-theo-tieu-de-khong-dau"",
                         ""Description"": ""Đoạn tóm tắt (Sapo) khoảng 150 ký tự để làm meta description"",
-                        ""HtmlContent"": ""Nội dung bài viết chi tiết. Sử dụng các thẻ HTML như <h2>, <p>, <ul>, <li>, <b>. Viết dài khoảng 500 từ. Giọng văn chuyên nghiệp, lôi cuốn."",
+                        ""HtmlContent"": ""Nội dung bài viết chi tiết. Sử dụng các thẻ HTML như <h2>, <p>, <ul>, <li>, <b>. Viết dài khoảng 500 từ. Giọng văn cuốn hút, chuyên nghiệp nhưng vẫn lầy lội."",
                         ""Tags"": [""Tag1"", ""Tag2"", ""Tag3""]
                     }}
-
                 ";
 
             var generatedJson = await GenerateContentWithGemini(prompt);
             Console.WriteLine("\n--- KẾT QUẢ BÀI VIẾT (Ready to Post) ---\n");
-            Console.WriteLine(ogImage);
+
             if (!string.IsNullOrEmpty(generatedJson))
             {
                 try
                 {
-                    // 3. Parse JSON từ AI sang Object C#
                     var articleDto = JsonSerializer.Deserialize<GeneratedArticleDto>(generatedJson);
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = ConsoleColor.Magenta; // Đổi màu console cho điệu đà Anime chút
                     Console.WriteLine(articleDto.Title);
                     Console.WriteLine($"\n[Mô tả]: {articleDto.Description}");
                     Console.WriteLine($"\n{articleDto.HtmlContent}");
-
-
-                    Console.WriteLine($"\n[Nguồn tin]: {randomNews.Link}"); // Để bạn check lại nếu cần
+                    Console.WriteLine($"\n[Nguồn tin]: {randomNews.Link}");
                     Console.ResetColor();
-                    // 4. Lưu vào Database
+
                     await SavePostToDatabase(articleDto, finalImageUrl);
                     return articleDto.Title;
                 }
@@ -145,10 +147,10 @@ namespace GaVL.Application.Catalog.Posts
                     Console.WriteLine($"Lỗi xử lý JSON hoặc DB: {ex.Message}");
                     return "Lỗi xử lý JSON hoặc DB " + ex.Message;
                 }
-
             }
             return "Chưa có tin tức mới hôm nay.";
         }
+
         private async Task<string> ProcessAndUploadToR2(string originalUrl)
         {
             try
@@ -162,22 +164,13 @@ namespace GaVL.Application.Catalog.Posts
 
                 var contentType = response.Content.Headers.ContentType?.MediaType ?? "image/jpeg";
                 var extension = GetExtensionFromMimeType(contentType);
-                var fileName = $"post-images/{DateTime.Now:yyyy/MM/dd}/{Guid.NewGuid()}.{extension}";
+                var fileName = $"post-images/anime/{DateTime.Now:yyyy/MM/dd}/{Guid.NewGuid()}.{extension}"; // Tạo thư mục con "anime"
 
-                // --- SỬA ĐOẠN NÀY ---
-                // 1. Lấy stream từ mạng
                 using var networkStream = await response.Content.ReadAsStreamAsync();
-
-                // 2. Tạo MemoryStream để chứa dữ liệu
                 using var memoryStream = new MemoryStream();
-
-                // 3. Copy dữ liệu từ mạng vào RAM
                 await networkStream.CopyToAsync(memoryStream);
-
-                // 4. QUAN TRỌNG: Reset vị trí con trỏ về đầu file để R2 đọc
                 memoryStream.Position = 0;
 
-                // 5. Gửi MemoryStream lên R2 (Lúc này stream đã có .Length)
                 return await _r2Service.UploadStreamGetUrl(memoryStream, fileName, contentType);
             }
             catch (Exception ex)
@@ -186,6 +179,7 @@ namespace GaVL.Application.Catalog.Posts
                 return null;
             }
         }
+
         private string GetExtensionFromMimeType(string mimeType)
         {
             return mimeType switch
@@ -197,10 +191,10 @@ namespace GaVL.Application.Catalog.Posts
                 _ => "jpg"
             };
         }
+
         async Task<NewsItem?> GetRandomNewsFromRss()
         {
             using var client = new HttpClient();
-            // Fake User-Agent để tránh bị chặn bởi một số server RSS
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
 
             var allNews = new List<NewsItem>();
@@ -210,21 +204,18 @@ namespace GaVL.Application.Catalog.Posts
                 try
                 {
                     var xmlContent = await client.GetStringAsync(url);
-
-                    // Dùng XmlReader để đọc RSS
                     using var reader = XmlReader.Create(new StringReader(xmlContent));
                     var feed = SyndicationFeed.Load(reader);
 
                     foreach (var item in feed.Items)
                     {
-                        // Chỉ lấy tin trong vòng 24h qua để đảm bảo tính thời sự
                         if (item.PublishDate > DateTimeOffset.Now.AddHours(-72))
                         {
                             var imgFromRss = item.Links.FirstOrDefault(l => l.RelationshipType == "enclosure" && l.MediaType.StartsWith("image"))?.Uri.ToString();
                             allNews.Add(new NewsItem
                             {
                                 Title = item.Title.Text,
-                                Summary = item.Summary?.Text ?? item.Title.Text, // Một số feed không có summary thì lấy title
+                                Summary = item.Summary?.Text ?? item.Title.Text,
                                 Link = item.Links.FirstOrDefault()?.Uri.ToString() ?? "",
                                 Image = imgFromRss
                             });
@@ -233,48 +224,30 @@ namespace GaVL.Application.Catalog.Posts
                 }
                 catch
                 {
-                    // Bỏ qua nếu 1 link RSS bị lỗi, chạy tiếp link khác
                     continue;
                 }
             }
 
             if (allNews.Count == 0) return null;
 
-            // Random chọn 1 tin từ danh sách đã lọc
             var random = new Random();
             int index = random.Next(allNews.Count);
             return allNews[index];
         }
-        // Đừng quên using HtmlAgilityPack;
+
         async Task<string> GetOgImage(string url)
         {
-            // Nếu URL rỗng thì trả về null luôn
             if (string.IsNullOrEmpty(url)) return null;
-
             try
             {
                 using var client = new HttpClient();
-
-                // Cài đặt timeout ngắn (10s) để tránh treo bot nếu API chậm
                 client.Timeout = TimeSpan.FromSeconds(10);
-
-                // 1. Mã hóa URL gốc để gửi qua API (tránh lỗi ký tự đặc biệt)
                 string encodedUrl = Uri.EscapeDataString(url);
-
-                // 2. Gọi API Microlink (Bản Free không cần API Key)
                 string apiUrl = $"https://api.microlink.io?url={encodedUrl}";
-
-                // 3. Nhận kết quả JSON
                 var jsonResponse = await client.GetStringAsync(apiUrl);
-
-                // 4. Parse JSON để lấy link ảnh
                 var jsonNode = JsonNode.Parse(jsonResponse);
-
-                // Cấu trúc JSON trả về: { "status": "success", "data": { "image": { "url": "..." } } }
-                // Dùng dấu ? (null conditional) để không bị lỗi nếu không có ảnh
                 string imageUrl = jsonNode?["data"]?["image"]?["url"]?.ToString();
 
-                // Kiểm tra xem link có hợp lệ không
                 if (!string.IsNullOrEmpty(imageUrl) && Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
                 {
                     return imageUrl;
@@ -282,20 +255,18 @@ namespace GaVL.Application.Catalog.Posts
             }
             catch (Exception ex)
             {
-                // Log lỗi nhẹ nhàng để biết, không throw exception làm chết app
                 Console.WriteLine($"[Microlink Error] Không lấy được ảnh cho bài viết: {ex.Message}");
             }
-
-            // Trả về null nếu có lỗi hoặc không tìm thấy ảnh
             return null;
         }
+
         async Task<string> GenerateContentWithGemini(string promptText)
         {
             using var client = new HttpClient();
             var requestBody = new
             {
                 contents = new[] { new { parts = new[] { new { text = promptText } } } },
-                generationConfig = new { temperature = 0.6 } // Tăng creative lên 0.8 cho bài viết bay bổng
+                generationConfig = new { temperature = 0.7 } // Nhiệt độ 0.7 cho độ sáng tạo tốt
             };
 
             var jsonContent = new StringContent(
@@ -305,10 +276,12 @@ namespace GaVL.Application.Catalog.Posts
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var jsonNode = JsonNode.Parse(jsonResponse);
             string rawText = jsonNode?["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString();
+
             if (string.IsNullOrEmpty(rawText)) return null;
             rawText = rawText.Replace("```json", "").Replace("```", "").Trim();
             return rawText;
         }
+
         async Task SavePostToDatabase(GeneratedArticleDto dto, string imgUrl)
         {
             var postTags = new List<PostTag>();
@@ -317,46 +290,27 @@ namespace GaVL.Application.Catalog.Posts
             {
                 UserId = BotUserId,
                 CategoryId = DefaultCategoryId,
-                Code = "BOT-" + code, // Mã bài viết
+                Code = "ANIBOT-" + code, // Đổi tiền tố code để dễ phân biệt
                 Title = dto.Title,
                 SeoAlias = dto.SeoAlias,
                 Description = dto.HtmlContent,
-
-                // LƯU Ý: Vì Entity của bạn không có trường Content, tôi đang lưu vào Sumary.
-                // Hãy đổi sang trường Content nếu bạn update DB.
                 Sumary = dto.Description,
-
-                MainImage = imgUrl, // Link ảnh lấy từ RSS gốc
+                MainImage = imgUrl,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
                 IsDeleted = false,
                 PostTags = postTags
             };
+
             _db.Posts.Add(newPost);
             await _db.SaveChangesAsync();
-
             await RemoveCache();
         }
+
         private async Task RemoveCache()
         {
             var pattern = $"{KeyPrefix}:*";
             await _redis.DeleteKeysByPatternAsync(pattern);
         }
-    }
-    public class NewsItem
-    {
-        public string Title { get; set; } = "";
-        public string Summary { get; set; } = "";
-        public string Link { get; set; } = "";
-        public string Image { get; set; } = "";
-    }
-    public class GeneratedArticleDto
-    {
-        public string Title { get; set; }
-        public string SeoAlias { get; set; }
-        public string Description { get; set; }
-        public string HtmlContent { get; set; } // Đây là nội dung chính
-        public string ImageUrl { get; set; }
-        public List<string> Tags { get; set; }
     }
 }

@@ -98,7 +98,8 @@ namespace GaVL.Application.Catalog.Posts
                 Id = post.Id,
                 Name = post.Title,
                 SeoAlias = post.SeoAlias,
-                Thumbnail = post.MainImage
+                Thumbnail = post.MainImage,
+                Sumary = post.Sumary
             };
             await SaveCache(key, seoPostDTO);
             return new ApiSuccessResult<SeoPostDTO>(seoPostDTO);

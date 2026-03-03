@@ -12,6 +12,7 @@ namespace GaVL.Application.Systems
     {
         Task UploadFileGetKey(IFormFile file, string key);
         Task<string> UploadFileGetUrl(IFormFile file, string key);
+        Task<string> UploadStreamGetUrl(Stream stream, string key, string contentType);
         Task DeleteFileAsync(string key, string keyPref);
         Task DeleteFilesAsync(List<string> keys);
         Task DeleteOldImage(string urlImage);
@@ -84,7 +85,36 @@ namespace GaVL.Application.Systems
                 throw new Exception($"Some objects failed to delete: {errors}");
             }
         }
+        public async Task<string> UploadStreamGetUrl(Stream stream, string key, string contentType)
+        {
+            try
+            {
+                var putRequest = new PutObjectRequest
+                {
+                    BucketName = _options.BucketName,
+                    Key = key,
+                    InputStream = stream,
+                    ContentType = contentType, // Quan trọng để trình duyệt hiểu đây là ảnh
+                    DisablePayloadSigning = true,
+                    DisableDefaultChecksumValidation = true
+                };
 
+                var response = await _s3Client.PutObjectAsync(putRequest);
+
+                if (response.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    Console.WriteLine($"R2 Upload Failed: {response.HttpStatusCode}");
+                    return string.Empty;
+                }
+
+                return $"{_options.PublicEndpoint}/{key}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"R2 Error: {ex.Message}");
+                return string.Empty;
+            }
+        }
         public async Task UploadFileGetKey(IFormFile file, string key)
         {
             using var stream = file.OpenReadStream();
