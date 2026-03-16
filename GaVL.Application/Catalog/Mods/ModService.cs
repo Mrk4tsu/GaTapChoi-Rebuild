@@ -14,6 +14,8 @@ namespace GaVL.Application.Catalog.Mods
     public interface IModService
     {
         Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request);
+        Task<ApiResult<List<ModDTO>>> GetModsPopular(int take);
+        Task<ApiResult<PagedResult<ModDTO>>> GetModsByUserId(PagingRequest request, Guid userId);
         Task<ApiResult<ModDetailDTO>> GetModById(int modId);
         Task<ApiResult<SeoModDTO>> GetSeoModById(int modId);
         Task<ApiResult<ModInner>> GetModInternalById(int id);
@@ -43,7 +45,6 @@ namespace GaVL.Application.Catalog.Mods
                .SetTimeZone("SE Asia Standard Time")
                .SetRemoveTick(true).Build();
         }
-
         public async Task<ApiResult<PagedResult<ModDTO>>> GetMods(ModQueryRequest request)
         {
             var cacheKey = $"mods:p{request.PageIndex}:s{request.PageSize}:u{request.Username?.ToLower() ?? "all"}:c{request.CategoryId ?? 0}";
@@ -100,7 +101,91 @@ namespace GaVL.Application.Catalog.Mods
             await _redisService.SetValue(cacheKey, result, TimeSpan.FromMinutes(CacheExpiryValue));
             return new ApiSuccessResult<PagedResult<ModDTO>>(result);
         }
+        public async Task<ApiResult<List<ModDTO>>> GetModsPopular(int take)
+        {
+            var cacheKey = $"mods:popular:{take}";
+            var cachedResult = await _redisService.GetValue<List<ModDTO>>(cacheKey);
+            if (cachedResult != null)
+            {
+                return new ApiSuccessResult<List<ModDTO>>(cachedResult);
+            }
+            var mods = await _dbContext.Mods
+            .AsNoTracking()
+            .Include(m => m.User)
+            .Include(m => m.Category)
+            .Where(m => !m.IsDeleted)
+            .OrderByDescending(x => x.ViewCount)
+            .Take(take)
+            .ToListAsync();
+            var modDtos = mods.Select(m => new ModDTO
+            {
+                Id = m.Id,
+                Name = m.Name,
+                CreatedAt = m.CreatedAt,
+                UpdatedAt = m.UpdatedAt,
+                Username = m.User.Username,
+                CategoryName = m.Category.Name,
+                CategoryId = m.Category.Id,
+                CrackType = m.CrackType,
+                SeoAlias = m.SeoAlias,
+                IsPrivate = m.IsPrivate,
+                Thumbnail = m.Thumbnail
+            }).ToList();
+            await _redisService.SetValue(cacheKey, modDtos, TimeSpan.FromDays(1));
+            return new ApiSuccessResult<List<ModDTO>>(modDtos);
+        }
+        public async Task<ApiResult<PagedResult<ModDTO>>> GetModsByUserId(PagingRequest request, Guid userId)
+        {
+            var cacheKey = $"mods:p{request.PageIndex}:s{request.PageSize}:uid{userId}";
+            var cachedResult = await _redisService.GetValue<PagedResult<ModDTO>>(cacheKey);
+            if (cachedResult != null)
+            {
+                var pageResult = new PagedResult<ModDTO>
+                {
+                    Items = cachedResult.Items,
+                    TotalRecords = cachedResult.TotalRecords,
+                    PageIndex = cachedResult.PageIndex,
+                    PageSize = cachedResult.PageSize
+                };
+                return new ApiSuccessResult<PagedResult<ModDTO>>(pageResult);
+            }
+            var query = _dbContext.Mods
+            .Include(m => m.User)
+            .Include(m => m.Category)
+            .Where(m => !m.IsDeleted && m.UserId == userId);
 
+            var totalRecords = await query.CountAsync();
+            var mods = await query
+            .OrderByDescending(x => x.UpdatedAt)
+            .Skip((request.PageIndex - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+            var modDtos = mods.Select(m => new ModDTO
+            {
+                Id = m.Id,
+                Name = m.Name,
+                CreatedAt = m.CreatedAt,
+                UpdatedAt = m.UpdatedAt,
+                Username = m.User.Username,
+                CategoryName = m.Category.Name,
+                CategoryId = m.Category.Id,
+                CrackType = m.CrackType,
+                SeoAlias = m.SeoAlias,
+                IsPrivate = m.IsPrivate,
+                Thumbnail = m.Thumbnail
+            }).ToList();
+
+            var result = new PagedResult<ModDTO>
+            {
+                Items = modDtos,
+                PageIndex = request.PageIndex,
+                PageSize = request.PageSize,
+                TotalRecords = totalRecords
+            };
+            await _redisService.SetValue(cacheKey, result, TimeSpan.FromMinutes(CacheExpiryValue));
+            return new ApiSuccessResult<PagedResult<ModDTO>>(result);
+        }
         public async Task<ApiResult<int>> CreateMod(ModCombineRequest request, Guid userId)
         {
             var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
@@ -129,11 +214,13 @@ namespace GaVL.Application.Catalog.Mods
             var cachedMod = await _redisService.GetValue<ModDetailDTO>(cacheKey);
             if (cachedMod != null) return new ApiSuccessResult<ModDetailDTO>(cachedMod);
             var mod = await _dbContext.Mods.AsNoTracking()
+               .Include(m => m.User)
                .Where(m => m.Id == modId && !m.IsDeleted)
                .Select(x => new ModDetailDTO
                {
                    Id = x.Id,
                    AuthorId = x.UserId,
+                   AuthorAvatar = x.User.AvatarUrl!,
                    Name = x.Name,
                    Description = x.Description,
                    CreatedAt = x.CreatedAt,
@@ -159,7 +246,6 @@ namespace GaVL.Application.Catalog.Mods
             }
             return new ApiErrorResult<ModDetailDTO>("Mod not found");
         }
-
         public async Task<ApiResult<SeoModDTO>> GetSeoModById(int modId)
         {
             var cacheKey = $"seoMod:{modId}";
@@ -184,14 +270,12 @@ namespace GaVL.Application.Catalog.Mods
             await _redisService.SetValue(cacheKey, seoModDto);
             return new ApiSuccessResult<SeoModDTO>(seoModDto);
         }
-
         public async Task<ApiResult<int>> UpdateMod(int modId, ModUpdateCombineRequest request, Guid userId)
         {
             var updateMod = new UpdateModFacade(_dbContext, _redisService, _now);
             var result = await updateMod.UpdateMod(modId, request, userId);
             return result;
         }
-
         public async Task<ApiResult<int>> UpdateStatus(int modId, Guid userId)
         {
             var mod = await _dbContext.Mods
@@ -206,7 +290,6 @@ namespace GaVL.Application.Catalog.Mods
             await _dbContext.SaveChangesAsync();
             return new ApiSuccessResult<int>(mod.Id);
         }
-
         public async Task<ApiResult<bool>> IncreaseView(int modId)
         {
             var mod = await _dbContext.Mods.FirstOrDefaultAsync(x => x.Id == modId && !x.IsDeleted);
@@ -216,7 +299,6 @@ namespace GaVL.Application.Catalog.Mods
             await _dbContext.SaveChangesAsync();
             return new ApiSuccessResult<bool>(true);
         }
-
         public async Task<ApiResult<bool>> DeleteMod(int modId, Guid userId)
         {
             var mod = await _dbContext.Mods
@@ -227,9 +309,10 @@ namespace GaVL.Application.Catalog.Mods
             mod.IsDeleted = true;
             _dbContext.Mods.Update(mod);
             await _dbContext.SaveChangesAsync();
+
+            await removeCache(modId);
             return new ApiSuccessResult<bool>(true);
         }
-
         public async Task<ApiResult<ModInner>> GetModInternalById(int id)
         {
             var mod = await _dbContext.Mods.Include(x => x.User).FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == id);
@@ -250,6 +333,18 @@ namespace GaVL.Application.Catalog.Mods
                 Urls = urls
             };
             return new ApiSuccessResult<ModInner>(modVM);
+        }
+        private async Task removeCache(int? modId = null)
+        {
+            var cacheKey = $"mod:detail:{modId}";
+            var cacheSeoKey = $"seoMod:{modId}";
+            await _redisService.DeleteKeysByPatternAsync("mods:*");
+            if (modId.HasValue)
+            {
+                await _redisService.DeleteKeysByPatternAsync(cacheKey);
+                await _redisService.RemoveKeyAsync(cacheKey);
+                await _redisService.RemoveKeyAsync(cacheSeoKey);
+            }
         }
     }
 }

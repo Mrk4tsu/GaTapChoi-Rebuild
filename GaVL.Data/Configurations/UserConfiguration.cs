@@ -14,12 +14,15 @@ namespace GaVL.Data.Configurations
             builder.Property(u => u.Id).HasColumnName("id").HasValueGenerator<UuidV7Generator>();
             builder.Property(u => u.Username).IsRequired().HasMaxLength(50).HasColumnName("username");
             builder.Property(u => u.Email).IsRequired().HasMaxLength(100).HasColumnName("email");
-            builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(100).HasColumnName("password_hash");
+            builder.Property(u => u.PasswordHash).IsRequired(false).HasMaxLength(100).HasColumnName("password_hash");
             builder.Property(u => u.AvatarUrl).HasMaxLength(200).HasColumnName("avatar_url");
             builder.Property(u => u.CreatedAt).IsRequired().HasColumnName("created_at");
             builder.Property(u => u.IsActive).IsRequired().HasDefaultValue(false).HasColumnName("is_active");
             builder.Property(u => u.LastLoginAt).HasColumnName("last_login_at");
             builder.Property(u => u.RoleId).IsRequired().HasDefaultValue(4).HasColumnName("role_id");
+            builder.Property(u => u.AuthProvider).IsRequired().HasMaxLength(50).HasColumnName("auth_provider");
+            builder.Property(u => u.GoogleSubjectId).HasMaxLength(100).HasColumnName("google_subject_id");
+            builder.Property(u => u.FullName).IsRequired().HasMaxLength(100).HasColumnName("full_name");
 
             //Index
             builder.HasIndex(u => u.Username).IsUnique();

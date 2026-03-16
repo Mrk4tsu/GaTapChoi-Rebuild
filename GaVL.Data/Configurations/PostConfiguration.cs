@@ -20,6 +20,8 @@ namespace GaVL.Data.Configurations
             builder.Property(x => x.UserId).HasColumnName("user_id");
             builder.Property(x => x.MainImage).HasColumnName("main_image").HasMaxLength(250);
             builder.Property(x => x.Code).HasColumnName("code").HasMaxLength(15);
+            builder.Property(x => x.Sumary).HasColumnName("sumary").HasMaxLength(500);
+            builder.Property(x => x.CategoryId).HasColumnName("category_id");
 
             builder.HasOne(x => x.User).WithMany(x => x.Posts).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
             //Index
