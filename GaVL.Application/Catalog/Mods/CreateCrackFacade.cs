@@ -73,10 +73,7 @@ namespace GaVL.Application.Catalog.Mods
             };
             var urlResult = await CreateInternalUrl(newUrl, modResult.Data);
             if (!urlResult.Success) return urlResult;
-            _ = Task.Run(async () =>
-            {
-                await removeCache();
-            });
+            _ = removeCache();
             return new ApiSuccessResult<int>(modResult.Data);
         }
         private async Task<ApiResult<int>> CreateInternalCrack(ModRequest request, Guid userId, byte type)

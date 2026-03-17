@@ -42,7 +42,7 @@ namespace GaVL.Application.Catalog.Posts
         private readonly List<string> RssSources = new()
         {
             "https://www.animenewsnetwork.com/news/rss.xml", // Anime News Network (Nguồn uy tín nhất)
-            "https://cr-news-api-service.prd.crunchyrollsvc.com/v1/en-US/rss", // Crunchyroll News
+            //"https://cr-news-api-service.prd.crunchyrollsvc.com/v1/en-US/rss", // Crunchyroll News
             "https://myanimelist.net/rss/news.xml" // MyAnimeList News
         };
 

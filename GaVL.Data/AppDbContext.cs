@@ -1,5 +1,6 @@
 ﻿using GaVL.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace GaVL.Data
 {
@@ -10,6 +11,7 @@ namespace GaVL.Data
         }
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.HasPostgresExtension("pg_trgm");
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
         public DbSet<User> Users { get; set; }
@@ -24,5 +26,7 @@ namespace GaVL.Data
         public DbSet<PostCategory> PostCategories { get; set; }
         public DbSet<PostRevision> PostRevisions { get; set; }
         public DbSet<Notify> Notifies { get; set; }
+        public DbSet<PaymentTransaction> Payments { get; set; }
+        public DbSet<Order> Orders { get; set; }
     }
 }

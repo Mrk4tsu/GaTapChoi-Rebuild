@@ -1,4 +1,5 @@
 ﻿using GaVL.API.Hubs;
+using GaVL.Application.Systems;
 using GaVL.DTO.Notification;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,12 +12,20 @@ namespace GaVL.API.Controllers
     [ApiController]
     public class NotifiesController : BasesController
     {
+        private readonly INotifyService _notifyService;
         private readonly IHubContext<NotifyHub> _hubContext;
         private readonly ILogger<NotifiesController> _logger;
-        public NotifiesController(ILogger<NotifiesController> logger, IHubContext<NotifyHub> hubContext)
+        public NotifiesController(ILogger<NotifiesController> logger, IHubContext<NotifyHub> hubContext, INotifyService notifyService)
         {
             _logger = logger;
             _hubContext = hubContext;
+            _notifyService = notifyService;
+        }
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var result = await _notifyService.GetListNotify();
+            return Ok(result);
         }
         [HttpPost("hook")]
         public async Task<IActionResult> MemberJoined([FromBody] MemberJoinedDto dto, string key)

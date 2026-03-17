@@ -3,6 +3,7 @@ using System;
 using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260312074637_Add-Order-Table")]
+    partial class AddOrderTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -269,7 +272,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 17, 1, 58, 28, 710, DateTimeKind.Utc).AddTicks(8663))
+                        .HasDefaultValue(new DateTime(2026, 3, 12, 7, 46, 36, 931, DateTimeKind.Utc).AddTicks(1941))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Email")
@@ -387,7 +390,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 17, 1, 58, 28, 712, DateTimeKind.Utc).AddTicks(1318))
+                        .HasDefaultValue(new DateTime(2026, 3, 12, 7, 46, 36, 933, DateTimeKind.Utc).AddTicks(2391))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -428,7 +431,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 17, 1, 58, 28, 712, DateTimeKind.Utc).AddTicks(1685))
+                        .HasDefaultValue(new DateTime(2026, 3, 12, 7, 46, 36, 933, DateTimeKind.Utc).AddTicks(2691))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")

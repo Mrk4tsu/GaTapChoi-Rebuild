@@ -12,7 +12,10 @@ namespace GaVL.Data.Configurations
             builder.ToTable("mods");
             builder.HasKey(m => m.Id);
             builder.Property(m => m.Id).HasColumnName("id").ValueGeneratedOnAdd();
-            builder.Property(m => m.Name).IsRequired().HasMaxLength(150).HasColumnName("name");
+            builder.Property(m => m.Name)
+                .IsRequired()
+                .HasMaxLength(150)
+                .HasColumnName("name");
             builder.Property(m => m.Description).HasColumnName("description");
             builder.Property(m => m.IsPrivate).IsRequired().HasMaxLength(50).HasColumnName("is_private");
             builder.Property(m => m.IsDeleted).IsRequired().HasColumnName("is_deleted");
@@ -30,7 +33,12 @@ namespace GaVL.Data.Configurations
             builder.HasOne(m => m.Category).WithMany(c => c.Mods).HasForeignKey(m => m.CategoryId);
 
             // Indexes
-            builder.HasIndex(m => m.Name);
+            builder.HasIndex(m => m.Name)
+                .HasMethod("gin")
+                .HasOperators("gin_trgm_ops");
+            builder.HasIndex(m => m.Description)
+                   .HasMethod("gin")
+                   .HasOperators("gin_trgm_ops");
             builder.HasIndex(x => x.IsDeleted);
             builder.HasIndex(x => x.IsPrivate);
             builder.HasIndex(x => x.UserId);

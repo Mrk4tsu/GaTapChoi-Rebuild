@@ -27,6 +27,12 @@ namespace GaVL.Data.Configurations
             //Index
             builder.HasIndex(x => x.IsDeleted);
             builder.HasIndex(x => x.Code);
+            builder.HasIndex(x => x.Title)
+                .HasMethod("gin")
+                .HasOperators("gin_trgm_ops");
+            builder.HasIndex(p => p.Sumary)
+                   .HasMethod("gin")
+                   .HasOperators("gin_trgm_ops");
         }
     }
 }

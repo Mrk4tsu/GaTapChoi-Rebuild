@@ -1,6 +1,8 @@
 ﻿using GaVL.Application.Auths;
+using GaVL.Application.Catalog.Common;
 using GaVL.Application.Catalog.Mods;
 using GaVL.Application.Catalog.Posts;
+using GaVL.Application.Payments;
 using GaVL.Application.Profiles;
 using GaVL.Application.Systems;
 using GaVL.DTO.Settings;
@@ -34,6 +36,9 @@ namespace GaVL.API.Extensions
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IBotNews, BotNews>();
             services.AddScoped<IBotAnimeNews, BotAnimeNews>();
+            services.AddScoped<INotifyService, NotifyService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<SearchService>();
 
             services.AddSingleton<MarkdownPipeline>(sp => new MarkdownPipelineBuilder().Build());
             return services;

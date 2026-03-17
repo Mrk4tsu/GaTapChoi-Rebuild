@@ -1,4 +1,5 @@
 ﻿using GaVL.Data;
+using GaVL.Data.Entities;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Notification;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ namespace GaVL.Application.Systems
     public interface INotifyService
     {
         Task<ApiResult<List<NotifyViewModel>>> GetListNotify();
-        Task<ApiResult<int>> Create();
+        Task<ApiResult<int>> Create(NotifyRequest request);
         Task<ApiResult<bool>> Update();
         Task<ApiResult<bool>> Delete();
     }
@@ -27,9 +28,19 @@ namespace GaVL.Application.Systems
             _context = context;
             _redis = redis;
         }
-        public Task<ApiResult<int>> Create()
+        public async Task<ApiResult<int>> Create(NotifyRequest request)
         {
-            throw new NotImplementedException();
+            var newNotify = new Notify()
+            {
+                Title = request.Title,
+                Content = request.Message,
+                Url = request.Url,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Notifies.Add(newNotify);
+            await _context.SaveChangesAsync();
+            await InvalidateCache();
+            return new ApiSuccessResult<int>(newNotify.Id);
         }
 
         public Task<ApiResult<bool>> Delete()
@@ -64,6 +75,11 @@ namespace GaVL.Application.Systems
         public Task<ApiResult<bool>> Update()
         {
             throw new NotImplementedException();
+        }
+        private async Task InvalidateCache()
+        {
+            var key = $"{PREFIX}:*";
+            await _redis.DeleteKeysByPatternAsync(key);
         }
     }
 }

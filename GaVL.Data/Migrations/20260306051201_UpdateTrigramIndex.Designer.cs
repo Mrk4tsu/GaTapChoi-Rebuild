@@ -3,6 +3,7 @@ using System;
 using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260306051201_UpdateTrigramIndex")]
+    partial class UpdateTrigramIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,111 +263,6 @@ namespace GaVL.Data.Migrations
                     b.ToTable("notifies", (string)null);
                 });
 
-            modelBuilder.Entity("GaVL.Data.Entities.Order", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 17, 1, 58, 28, 710, DateTimeKind.Utc).AddTicks(8663))
-                        .HasColumnName("create_at");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)")
-                        .HasColumnName("email");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("NumberPhone")
-                        .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("character varying(12)")
-                        .HasColumnName("number_phone");
-
-                    b.Property<int>("PaymentStatus")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("payment_status");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("amount");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("orders", (string)null);
-                });
-
-            modelBuilder.Entity("GaVL.Data.Entities.PaymentTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AccountNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("account_number");
-
-                    b.Property<decimal?>("Accumulated")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("accumulated");
-
-                    b.Property<decimal?>("AmountIn")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("amount_in");
-
-                    b.Property<decimal?>("AmountOut")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("amount_out");
-
-                    b.Property<string>("Body")
-                        .HasColumnType("text")
-                        .HasColumnName("body");
-
-                    b.Property<string>("Code")
-                        .HasColumnType("text")
-                        .HasColumnName("code");
-
-                    b.Property<string>("Gateway")
-                        .HasColumnType("text")
-                        .HasColumnName("gateway");
-
-                    b.Property<string>("ReferenceNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("reference_number");
-
-                    b.Property<int?>("SepayId")
-                        .HasColumnType("integer")
-                        .HasColumnName("sepay_id");
-
-                    b.Property<string>("SubAccount")
-                        .HasColumnType("text")
-                        .HasColumnName("sub_account");
-
-                    b.Property<string>("TransactionContent")
-                        .HasColumnType("text")
-                        .HasColumnName("transaction_content");
-
-                    b.Property<string>("TransactionDate")
-                        .HasColumnType("text")
-                        .HasColumnName("transaction_date");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("payment_transactions", (string)null);
-                });
-
             modelBuilder.Entity("GaVL.Data.Entities.Post", b =>
                 {
                     b.Property<int>("Id")
@@ -387,7 +285,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 17, 1, 58, 28, 712, DateTimeKind.Utc).AddTicks(1318))
+                        .HasDefaultValue(new DateTime(2026, 3, 6, 5, 12, 0, 929, DateTimeKind.Utc).AddTicks(8573))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -428,7 +326,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 17, 1, 58, 28, 712, DateTimeKind.Utc).AddTicks(1685))
+                        .HasDefaultValue(new DateTime(2026, 3, 6, 5, 12, 0, 929, DateTimeKind.Utc).AddTicks(8903))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")

@@ -15,6 +15,10 @@ namespace GaVL.Data.Configurations
                    .IsRequired()
                    .HasColumnName("title")
                    .HasMaxLength(200);
+            builder.Property(n => n.Thumbnail)
+                  .IsRequired()
+                  .HasColumnName("thumbnail")
+                  .HasMaxLength(250);
             builder.Property(n => n.Content)
                    .IsRequired()
                    .HasColumnName("content");
