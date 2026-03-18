@@ -93,5 +93,11 @@ namespace GaVL.API.Controllers
             }
             return Ok("API hoạt động bình thường");
         }
+        [HttpPost("remove-cache")]
+        public async Task<IActionResult> RemoveCache()
+        {
+            await _notifyService.InvalidateCache();
+            return Ok();
+        }
     }
 }

@@ -22,13 +22,9 @@ namespace GaVL.API.Controllers
         public async Task<IActionResult> Register([FromForm] RegisterRequest request)
         {
             var result = await _authService.Register(request);
-            if (result.Success)
-                return Ok(result);
-            else
-            {
-                _logger.LogWarning("Registration failed: {Message}", result.Message);
-                return BadRequest(result);
-            }
+
+            return Ok(result);
+
         }
         [HttpPost("login")]
         [EnableRateLimiting(SystemConstant.POLICY_LOGIN_IP)]
@@ -169,13 +165,13 @@ namespace GaVL.API.Controllers
             {
                 ipAddress = Request.Headers["X-Real-IP"].ToString();
             }
-            
+
             // Loại bỏ port nếu có
             if (!string.IsNullOrEmpty(ipAddress) && ipAddress.Contains(':'))
             {
                 ipAddress = ipAddress.Split(':')[0];
             }
-            
+
             return ipAddress ?? string.Empty;
         }
 

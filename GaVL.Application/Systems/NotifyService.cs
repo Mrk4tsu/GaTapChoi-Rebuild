@@ -8,6 +8,7 @@ namespace GaVL.Application.Systems
 {
     public interface INotifyService
     {
+        Task InvalidateCache();
         Task<ApiResult<List<NotifyViewModel>>> GetListNotify();
         Task<ApiResult<NotifyViewModel>> GetById(int id);
         Task<ApiResult<int>> Create(NotifyRequest request, Guid userId, CancellationToken ct = default);
@@ -187,7 +188,8 @@ namespace GaVL.Application.Systems
             if (roleId <= 0) return false;
             return roleId <= STAFF_MAX_ROLE_ID;
         }
-        private async Task InvalidateCache()
+
+        public async Task InvalidateCache()
         {
             var key = $"{PREFIX}:*";
             await _redis.DeleteKeysByPatternAsync(key);

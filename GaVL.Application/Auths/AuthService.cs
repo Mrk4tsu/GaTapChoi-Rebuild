@@ -140,7 +140,9 @@ namespace GaVL.Application.Auths
         public async Task<ApiResult<Guid>> Register(RegisterRequest request)
         {
             var isExistUsername = await isExistUsernameInDatabase(request.Username);
-            if (isExistUsername) return new ApiErrorResult<Guid>("Username is already taken.");
+            if (isExistUsername) return new ApiErrorResult<Guid>("Username đã tồn tại.");
+            var isExistEmail = await isExistEmailInDatabase(request.Email);
+            if (isExistEmail) return new ApiErrorResult<Guid>("Email đã tồn tại.");
 
             var isValidCaptcha = await _turnstileService.ValidateTokenAsync(request.CaptchaToken);
             if (!isValidCaptcha) return new ApiErrorResult<Guid>("CAPTCHA validation failed.");

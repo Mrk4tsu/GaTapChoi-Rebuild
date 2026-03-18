@@ -1,4 +1,5 @@
 using GaVL.API.Extensions;
+using Microsoft.Azure.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 

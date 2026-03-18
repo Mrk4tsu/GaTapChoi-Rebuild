@@ -4,6 +4,7 @@ using GaVL.Data.EntityTypes;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Payments;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace GaVL.Application.Payments
 {
@@ -92,20 +93,12 @@ namespace GaVL.Application.Payments
 
             _db.Payments.Add(transaction);
             await _db.SaveChangesAsync();
-
-            var content = data.Content?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(content))
+    
+            var oId = ExtractOrderIdFromContent(data.Content);
+            if (string.IsNullOrWhiteSpace(oId))
             {
-                return new ApiErrorResult<bool>("Order not found. Content is empty");
+                return new ApiErrorResult<bool>("Order not found. Missing 'TKPGA {orderId}' in content");
             }
-
-            // Split on any whitespace and remove empty entries, then take the last token as order id
-            var parts = content.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 0)
-            {
-                return new ApiErrorResult<bool>("Order not found. Content parsing failed");
-            }
-            var oId = parts[^1];
 
             var order = await _db.Orders
                 .FirstOrDefaultAsync(o => o.Id == oId && o.Total == amountIn && o.PaymentStatus == PaymentType.UnPaid);
@@ -113,10 +106,25 @@ namespace GaVL.Application.Payments
             {
                 return new ApiErrorResult<bool>($"Order not found. Order_id {oId}");
             }
+            await _notifier.NotifyPaymentSuccessAsync(order.Id);
             order.PaymentStatus = PaymentType.Paid;
             await _db.SaveChangesAsync();
-            await _notifier.NotifyPaymentSuccessAsync(order.Id);
+
             return new ApiSuccessResult<bool>();
+        }
+        private string? ExtractOrderIdFromContent(string? content)
+        {
+            if (string.IsNullOrWhiteSpace(content)) return null;
+
+            // Match: "TKPGA {orderId}" (orderId gồm chữ/số, ví dụ X1C7TY3Z)
+            // Cho phép nhiều khoảng trắng, không phân biệt hoa/thường nếu cần
+            var match = Regex.Match(
+                content,
+                @"\bTKPGA\s+([0-9A-Z]{8})\b",
+                RegexOptions.CultureInvariant | RegexOptions.IgnoreCase
+            );
+
+            return match.Success ? match.Groups[1].Value : null;
         }
         private string Generate8CharTimestamp()
         {
