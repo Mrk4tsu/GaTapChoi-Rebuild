@@ -1,4 +1,4 @@
-﻿using GaVL.Application.Profiles;
+using GaVL.Application.Profiles;
 using GaVL.DTO.Profiles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +42,22 @@ namespace GaVL.API.Controllers
             var result = await _profileService.UpdateFullname(userId.Value, newName);
             return Ok(result);
         }
+        [HttpPost("contacts"), Authorize]
+        public async Task<IActionResult> AddContacts([FromBody] List<ContactRequest> requests)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            if (requests == null || !requests.Any())
+            {
+                return BadRequest("Contact requests cannot be empty.");
+            }
+            var result = await _profileService.AddContacts(userId.Value, requests);
+            return Ok(result);
+        }
+
         [HttpGet("test"), Authorize]
         public async Task<IActionResult> TestEndpoint()
         {

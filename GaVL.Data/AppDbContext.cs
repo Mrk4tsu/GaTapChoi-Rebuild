@@ -1,4 +1,4 @@
-﻿using GaVL.Data.Entities;
+using GaVL.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
 
@@ -28,5 +28,6 @@ namespace GaVL.Data
         public DbSet<Notify> Notifies { get; set; }
         public DbSet<PaymentTransaction> Payments { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<UserContact> UserContacts { get; set; }
     }
 }

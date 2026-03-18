@@ -3,6 +3,7 @@ using System;
 using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260318093619_UpdateOrderTable2")]
+    partial class UpdateOrderTable2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -269,7 +272,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 39, 26, 3, DateTimeKind.Utc).AddTicks(6928))
+                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 36, 18, 920, DateTimeKind.Utc).AddTicks(1713))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Email")
@@ -389,7 +392,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 39, 26, 4, DateTimeKind.Utc).AddTicks(2699))
+                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 36, 18, 920, DateTimeKind.Utc).AddTicks(8302))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -430,7 +433,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 39, 26, 4, DateTimeKind.Utc).AddTicks(2846))
+                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 36, 18, 920, DateTimeKind.Utc).AddTicks(8453))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")
@@ -755,7 +758,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 39, 26, 6, DateTimeKind.Utc).AddTicks(8427))
+                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 36, 18, 923, DateTimeKind.Utc).AddTicks(6958))
                         .HasColumnName("created_at");
 
                     b.Property<string>("DisplayLabel")
@@ -799,7 +802,7 @@ namespace GaVL.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("user_contacts", (string)null);
+                    b.ToTable("UserContacts", (string)null);
                 });
 
             modelBuilder.Entity("GaVL.Data.Entities.Comment", b =>

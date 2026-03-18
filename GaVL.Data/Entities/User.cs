@@ -1,4 +1,4 @@
-﻿using GaVL.Data.EntityTypes;
+using GaVL.Data.EntityTypes;
 
 namespace GaVL.Data.Entities
 {
@@ -22,6 +22,6 @@ namespace GaVL.Data.Entities
         public List<Comment> Comments { get; set; }
         public List<Notify> Notifies { get; set; }
         public List<PostRevision> PostRevisions { get; set; }
-        public List<Order> Orders { get; set; }
+        public List<UserContact> Contacts { get; set; }
     }
 }

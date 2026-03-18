@@ -1,8 +1,9 @@
-﻿using GaVL.Application.Systems;
+using GaVL.Application.Systems;
 using GaVL.Data;
 using GaVL.DTO.APIResponse;
 using GaVL.DTO.Profiles;
 using Microsoft.EntityFrameworkCore;
+using GaVL.Data.Entities;
 
 namespace GaVL.Application.Profiles
 {
@@ -11,6 +12,7 @@ namespace GaVL.Application.Profiles
         Task<ApiResult<UserViewModel>> GetUserByUsername(string username);
         Task<ApiResult<string>> UploadAvatar(Guid userId, AvatarRequest request);
         Task<ApiResult<string>> UpdateFullname(Guid userId, string newName);
+        Task<ApiResult<bool>> AddContacts(Guid userId, List<ContactRequest> requests);
     }
     public class ProfileService : IProfileService
     {
@@ -35,6 +37,7 @@ namespace GaVL.Application.Profiles
                 return new ApiSuccessResult<UserViewModel>(cachedProfile);
             }
             var user = await _db.Users.AsNoTracking()
+                .Include(u => u.Contacts)
                 .Where(u => u.Username == username)
                 .FirstOrDefaultAsync();
             if (user == null)
@@ -48,7 +51,16 @@ namespace GaVL.Application.Profiles
                 Username = user.Username,
                 Email = user.Email,
                 AvatarUrl = user.AvatarUrl,
-                CreateAt = user.CreatedAt
+                CreateAt = user.CreatedAt,
+                Contacts = user.Contacts?.Select(c => new ContactViewModel
+                {
+                    Id = c.Id,
+                    Provider = c.Provider,
+                    Value = c.Value,
+                    DisplayLabel = c.DisplayLabel,
+                    IsPublic = c.IsPublic,
+                    Position = c.Position
+                }).ToList() ?? new List<ContactViewModel>()
             };
             await _redis.SetValue(profileKey, userResult, TimeSpan.FromHours(1));
             return new ApiSuccessResult<UserViewModel>(userResult);
@@ -85,6 +97,35 @@ namespace GaVL.Application.Profiles
             await _redis.SetValue(rateLimitKey, currentTimestamp, TimeSpan.FromDays(3));
             
             return new ApiSuccessResult<string>(newName);
+        }
+
+        public async Task<ApiResult<bool>> AddContacts(Guid userId, List<ContactRequest> requests)
+        {
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return new ApiErrorResult<bool>("User not found.");
+            }
+
+            foreach (var req in requests)
+            {
+                var newContact = new UserContact
+                {
+                    UserId = userId,
+                    Provider = req.Provider,
+                    Value = req.Value,
+                    DisplayLabel = req.DisplayLabel,
+                    IsPublic = req.IsPublic,
+                    Position = req.Position,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.UserContacts.Add(newContact);
+            }
+
+            await _db.SaveChangesAsync();
+            _ = removeCache();
+
+            return new ApiSuccessResult<bool>(true);
         }
 
         public async Task<ApiResult<string>> UploadAvatar(Guid userId, AvatarRequest request)

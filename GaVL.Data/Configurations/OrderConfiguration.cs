@@ -12,6 +12,7 @@ namespace GaVL.Data.Configurations
             builder.ToTable("orders");
             builder.HasKey(o => o.Id);
             builder.Property(o => o.Id).HasColumnName("id").IsRequired();
+            builder.Property(o => o.Name).HasColumnName("name").HasMaxLength(500);
             builder.Property(o => o.Total)
                 .HasColumnType("decimal(18,2)")
                 .HasColumnName("amount")

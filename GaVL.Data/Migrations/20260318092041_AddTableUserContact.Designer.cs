@@ -3,6 +3,7 @@ using System;
 using GaVL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GaVL.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260318092041_AddTableUserContact")]
+    partial class AddTableUserContact
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -269,7 +272,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 39, 26, 3, DateTimeKind.Utc).AddTicks(6928))
+                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 20, 38, 749, DateTimeKind.Utc).AddTicks(7297))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Email")
@@ -280,9 +283,7 @@ namespace GaVL.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("name");
+                        .HasColumnType("text");
 
                     b.Property<string>("NumberPhone")
                         .IsRequired()
@@ -300,7 +301,13 @@ namespace GaVL.Data.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("amount");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("orders", (string)null);
                 });
@@ -389,7 +396,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 39, 26, 4, DateTimeKind.Utc).AddTicks(2699))
+                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 20, 38, 750, DateTimeKind.Utc).AddTicks(3335))
                         .HasColumnName("create_at");
 
                     b.Property<string>("Description")
@@ -430,7 +437,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("UpdateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 39, 26, 4, DateTimeKind.Utc).AddTicks(2846))
+                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 20, 38, 750, DateTimeKind.Utc).AddTicks(3480))
                         .HasColumnName("update_at");
 
                     b.Property<Guid>("UserId")
@@ -755,7 +762,7 @@ namespace GaVL.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 39, 26, 6, DateTimeKind.Utc).AddTicks(8427))
+                        .HasDefaultValue(new DateTime(2026, 3, 18, 9, 20, 38, 752, DateTimeKind.Utc).AddTicks(7201))
                         .HasColumnName("created_at");
 
                     b.Property<string>("DisplayLabel")
@@ -799,7 +806,7 @@ namespace GaVL.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("user_contacts", (string)null);
+                    b.ToTable("UserContacts", (string)null);
                 });
 
             modelBuilder.Entity("GaVL.Data.Entities.Comment", b =>
@@ -849,6 +856,17 @@ namespace GaVL.Data.Migrations
                 {
                     b.HasOne("GaVL.Data.Entities.User", "User")
                         .WithMany("Notifies")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GaVL.Data.Entities.Order", b =>
+                {
+                    b.HasOne("GaVL.Data.Entities.User", "User")
+                        .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -982,6 +1000,8 @@ namespace GaVL.Data.Migrations
                     b.Navigation("Mods");
 
                     b.Navigation("Notifies");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("PostRevisions");
 
