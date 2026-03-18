@@ -1,4 +1,4 @@
-﻿using GaVL.Data;
+using GaVL.Data;
 using GaVL.Data.Entities;
 using GaVL.Data.EntityTypes;
 using GaVL.DTO.APIResponse;
@@ -17,9 +17,11 @@ namespace GaVL.Application.Payments
     public class PaymentService : IPaymentService
     {
         private readonly AppDbContext _db;
-        public PaymentService(AppDbContext db)
+        private readonly ISignalRPaymentNotifier _notifier;
+        public PaymentService(AppDbContext db, ISignalRPaymentNotifier notifier)
         {
             _db = db;
+            _notifier = notifier;
         }
         public async Task<ApiResult<PaymentType>> CheckPaymentStatus(CheckStatusRequest request)
         {
@@ -51,6 +53,22 @@ namespace GaVL.Application.Payments
         }
         public async Task<ApiResult<bool>> HandleSepayWebhook(SepayWebhookData data)
         {
+            /*
+             PSEUDOCODE / PLAN:
+             1. Validate input 'data' is not null.
+             2. Compute amountIn and amountOut based on TransferType.
+             3. Create and persist a PaymentTransaction record.
+             4. Trim 'data.Content' and ensure it's not empty.
+             5. Split the content into tokens using whitespace and remove empty entries.
+             6. Take the last token (safely) as the order id (oId).
+             7. Query the Orders table for an order matching:
+                - Id == oId
+                - Total == amountIn
+                - PaymentStatus == UnPaid
+             8. If no matching order, return an error result.
+             9. Mark order as Paid, save changes, notify via SignalR, and return success.
+            */
+
             if (data == null) return new ApiErrorResult<bool>("Đéo thấy");
 
             decimal amountIn = data.TransferType == "in" ? data.TransferAmount : 0;
@@ -80,16 +98,24 @@ namespace GaVL.Application.Payments
             {
                 return new ApiErrorResult<bool>("Order not found. Content is empty");
             }
-            var oId = content.Split(' ')[1];
+
+            // Split on any whitespace and remove empty entries, then take the last token as order id
+            var parts = content.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0)
+            {
+                return new ApiErrorResult<bool>("Order not found. Content parsing failed");
+            }
+            var oId = parts[^1];
+
             var order = await _db.Orders
-            .FirstOrDefaultAsync(o => o.Id == oId && o.Total == amountIn && o.PaymentStatus == PaymentType.UnPaid);
+                .FirstOrDefaultAsync(o => o.Id == oId && o.Total == amountIn && o.PaymentStatus == PaymentType.UnPaid);
             if (order == null)
             {
                 return new ApiErrorResult<bool>($"Order not found. Order_id {oId}");
-                //return Ok(new { Success = false, Message = $"Order not found. Order_id {orderId}" });
             }
             order.PaymentStatus = PaymentType.Paid;
             await _db.SaveChangesAsync();
+            await _notifier.NotifyPaymentSuccessAsync(order.Id);
             return new ApiSuccessResult<bool>();
         }
         private string Generate8CharTimestamp()

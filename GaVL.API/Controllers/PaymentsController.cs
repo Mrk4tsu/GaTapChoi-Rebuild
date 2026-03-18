@@ -1,4 +1,4 @@
-﻿using GaVL.Application.Payments;
+using GaVL.Application.Payments;
 using GaVL.Application.Systems;
 using GaVL.DTO.Payments;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +14,12 @@ namespace GaVL.API.Controllers
         public PaymentsController(IPaymentService paymentService)
         {
             _paymentService = paymentService;
+        }
+        [HttpPost("check-status")]
+        public async Task<IActionResult> CheckPaymentStatus([FromBody] CheckStatusRequest request)
+        {
+            var result = await _paymentService.CheckPaymentStatus(request);
+            return Ok(result);
         }
         [HttpPost("order")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto request)

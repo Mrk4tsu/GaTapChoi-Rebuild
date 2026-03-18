@@ -1,4 +1,4 @@
-﻿using GaVL.Application.Payments;
+using GaVL.Application.Payments;
 using GaVL.DTO.Payments;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-﻿using GaVL.API.Hubs;
+using GaVL.API.Hubs;
 using GaVL.Application.Auths;
 using GaVL.Application.Systems;
 using GaVL.Data;
@@ -194,6 +194,7 @@ namespace GaVL.API.Extensions
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<NotifyHub>("notify");
+                endpoints.MapHub<PaymentHub>("payment");
             });
             return app;
         }
