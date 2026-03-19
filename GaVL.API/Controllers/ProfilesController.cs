@@ -58,6 +58,18 @@ namespace GaVL.API.Controllers
             return Ok(result);
         }
 
+        [HttpPut("info"), Authorize]
+        public async Task<IActionResult> UpdateUserInfo([FromBody] UpdateUserInfoRequest request)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var result = await _profileService.UpdateUserInfo(userId.Value, request);
+            return Ok(result);
+        }
+
         [HttpGet("test"), Authorize]
         public async Task<IActionResult> TestEndpoint()
         {

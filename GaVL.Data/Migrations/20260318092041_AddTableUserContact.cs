@@ -83,8 +83,6 @@ namespace GaVL.Data.Migrations
                 table: "UserContacts",
                 column: "user_id");
 
-            migrationBuilder.Sql("DELETE FROM orders WHERE user_id NOT IN (SELECT id FROM users);");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_orders_users_user_id",
                 table: "orders",

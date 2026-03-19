@@ -13,6 +13,7 @@ namespace GaVL.Application.Profiles
         Task<ApiResult<string>> UploadAvatar(Guid userId, AvatarRequest request);
         Task<ApiResult<string>> UpdateFullname(Guid userId, string newName);
         Task<ApiResult<bool>> AddContacts(Guid userId, List<ContactRequest> requests);
+        Task<ApiResult<bool>> UpdateUserInfo(Guid userId, UpdateUserInfoRequest request);
     }
     public class ProfileService : IProfileService
     {
@@ -120,6 +121,46 @@ namespace GaVL.Application.Profiles
                     CreatedAt = DateTime.UtcNow
                 };
                 _db.UserContacts.Add(newContact);
+            }
+
+            await _db.SaveChangesAsync();
+            _ = removeCache();
+
+            return new ApiSuccessResult<bool>(true);
+        }
+
+        public async Task<ApiResult<bool>> UpdateUserInfo(Guid userId, UpdateUserInfoRequest request)
+        {
+            var user = await _db.Users
+                .Include(u => u.Contacts)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return new ApiErrorResult<bool>("User not found.");
+            }
+
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                user.Email = request.Email;
+            }
+
+            if (request.Contacts != null)
+            {
+                _db.UserContacts.RemoveRange(user.Contacts);
+                foreach (var req in request.Contacts)
+                {
+                    _db.UserContacts.Add(new UserContact
+                    {
+                        UserId = userId,
+                        Provider = req.Provider,
+                        Value = req.Value,
+                        DisplayLabel = req.DisplayLabel,
+                        IsPublic = req.IsPublic,
+                        Position = req.Position,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
             }
 
             await _db.SaveChangesAsync();

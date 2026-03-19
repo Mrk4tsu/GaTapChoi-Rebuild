@@ -1,7 +1,5 @@
 using GaVL.Application.Payments;
-using GaVL.Application.Systems;
 using GaVL.DTO.Payments;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GaVL.API.Controllers
